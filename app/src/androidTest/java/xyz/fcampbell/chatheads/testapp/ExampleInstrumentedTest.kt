@@ -1,4 +1,4 @@
-package xyz.fcampbell.chatheads
+package xyz.fcampbell.chatheads.testapp
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
