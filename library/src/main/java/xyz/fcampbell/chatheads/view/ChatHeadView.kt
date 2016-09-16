@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 /**
  * Root layout that must be the parent of whatever will be used as a chat head.
@@ -29,7 +30,7 @@ class ChatHeadView @JvmOverloads constructor(
     private val chatHeadIcons = RecyclerView(context, attrs, defStyleAttr)
     private val chatHeadPages = ViewPager(context, attrs)
 
-    private val orchestrator = Orchestrator(chatHeadIcons, chatHeadPages)
+    private val orchestrator = Orchestrator(context, chatHeadIcons, chatHeadPages, true)
 
     init {
         removeAllViews() //We don't care about children
@@ -50,6 +51,7 @@ class ChatHeadView @JvmOverloads constructor(
     fun close() = orchestrator.close()
 
     class Orchestrator @JvmOverloads constructor(
+            context: Context,
             private val icons: RecyclerView,
             private val pages: ViewPager,
             var opened: Boolean = false) {
@@ -76,13 +78,15 @@ class ChatHeadView @JvmOverloads constructor(
             override fun onPageSelected(position: Int) = icons.smoothScrollToPosition(position)
         }
 
+        private val collapsingLinearLayoutManager = CollapsingLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
         fun setup(chatHeadAdapter: ChatHeadAdapter) {
             val iconAdapter = chatHeadAdapter.iconAdapter
             iconAdapter.chatHeadClickedListener = onChatHeadIconClickedListener
             icons.apply {
                 adapter = iconAdapter
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                layoutManager = collapsingLinearLayoutManager
             }
 
             pages.apply {
@@ -93,13 +97,19 @@ class ChatHeadView @JvmOverloads constructor(
         }
 
         fun open() {
-            opened = true
+            if (opened) return
 
             animatePagesScale(1f)
+            collapsingLinearLayoutManager.expand()
+
+            opened = true
         }
 
         fun close() {
+            if (!opened) return
+
             animatePagesScale(0f)
+            collapsingLinearLayoutManager.collapse()
 
             opened = false
         }

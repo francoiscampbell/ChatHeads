@@ -1,19 +1,21 @@
-package xyz.fcampbell.chatheads.view
+package xyz.fcampbell.chatheads.view.adapter
 
-import android.graphics.drawable.Drawable
+import android.support.annotation.LayoutRes
 import android.view.View
 
 /**
  * Adapts a data set into an icon and a page to be shown when the icon is expanded
  */
-abstract class ChatHeadAdapter() : ChatHeadIconAdapter.Delegate, ChatHeadPagerAdapter.Delegate {
-    val iconAdapter = ChatHeadIconAdapter(this)
-    val pageAdapter = ChatHeadPagerAdapter(this)
+abstract class ChatHeadAdapter(
+        @LayoutRes private val iconLayout: Int
+) : ChatHeadIconAdapter.Delegate, ChatHeadPagerAdapter.Delegate {
+    internal val iconAdapter = ChatHeadIconAdapter(iconLayout, this)
+    internal val pageAdapter = ChatHeadPagerAdapter(this)
 
     abstract fun getChatHeadCount(): Int
 
     override fun getIconCount() = getChatHeadCount()
-    abstract override fun getIcon(position: Int): Drawable
+    abstract override fun bindIcon(icon: View, position: Int)
 
     override fun getPageCount() = getChatHeadCount()
     abstract override fun getPage(position: Int): View

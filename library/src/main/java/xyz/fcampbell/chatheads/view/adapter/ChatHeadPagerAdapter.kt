@@ -1,4 +1,4 @@
-package xyz.fcampbell.chatheads.view
+package xyz.fcampbell.chatheads.view.adapter
 
 import android.support.v4.view.PagerAdapter
 import android.view.View
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 /**
  * Adapts a ChatHead's page property into a ViewPager
  */
-class ChatHeadPagerAdapter(val delegate: ChatHeadPagerAdapter.Delegate) : PagerAdapter() {
+internal class ChatHeadPagerAdapter(val delegate: Delegate) : PagerAdapter() {
     override fun instantiateItem(container: ViewGroup, position: Int): View {
         val page = delegate.getPage(position)
         container.addView(page)

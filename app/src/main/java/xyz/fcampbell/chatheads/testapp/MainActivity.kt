@@ -11,9 +11,9 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.onClick
 import xyz.fcampbell.chatheads.ChatHeadService
-import xyz.fcampbell.chatheads.view.ChatHeadAdapter
-import xyz.fcampbell.chatheads.view.ChatHeadListAdapter
 import xyz.fcampbell.chatheads.view.ChatHeadView
+import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
+import xyz.fcampbell.chatheads.view.impl.ChatHeadListAdapter
 
 class MainActivity : AppCompatActivity() {
 
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                 ChatHeadListAdapter.ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 3"; background = ColorDrawable(Color.WHITE) }))
 
 
-        return ChatHeadListAdapter(chatHeads)
+        return ChatHeadListAdapter(chatHeads, R.layout.layout_icon, R.id.iconImage)
     }
 
     override fun onDestroy() {
