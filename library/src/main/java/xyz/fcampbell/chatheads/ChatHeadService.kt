@@ -7,7 +7,7 @@ import android.os.IBinder
 import android.view.Gravity
 import android.view.WindowManager
 import org.jetbrains.anko.windowManager
-import xyz.fcampbell.chatheads.view.ChatHeadLayout
+import xyz.fcampbell.chatheads.view.ChatHeadView
 
 /**
  * The main Service to manage chat heads.
@@ -17,40 +17,41 @@ class ChatHeadService : Service() {
         gravity = Gravity.START or Gravity.TOP
         x = 0
         y = 0
-        width = WindowManager.LayoutParams.WRAP_CONTENT
-        height = WindowManager.LayoutParams.WRAP_CONTENT
+        width = WindowManager.LayoutParams.MATCH_PARENT
+        height = WindowManager.LayoutParams.MATCH_PARENT
         type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
         flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
     }
 
-    private val chatHeads = mutableListOf<ChatHeadLayout>()
+    var rootView: ChatHeadView? = null
+        private set
 
     /**
-     * Adds a ChatHeadLayout as a floating view. The same instance of a ChatHeadLayout can only be added once.
-     *
-     * @param view The chat head to add.
-     * @return Whether the chat head was successfully added or not.
+     * Shows a ChatHeadView as a floating view.
+     * @param view The root layout to show.
      */
-    fun addChatHead(view: ChatHeadLayout): Boolean {
-        if (view in chatHeads) return false
-
+    fun show(view: ChatHeadView) {
+        if (rootView != null) {
+            windowManager.removeView(rootView)
+        }
         windowManager.addView(view, layoutParams)
-        chatHeads += view
-        return true
+        rootView = view
     }
 
     /**
-     * Removes an already-added ChatHeadLayout.
-     *
-     * @param view The chat head to remove.
-     * @return Whether the chat head was successfully removed or not.
+     * Removes an already-added ChatHeadView.
      */
-    fun removeChatHead(view: ChatHeadLayout): Boolean {
-        if (view !in chatHeads) return false
+    fun hide() {
+        if (rootView == null) return
 
-        windowManager.removeView(view)
-        chatHeads -= view
-        return true
+        windowManager.removeView(rootView)
+        rootView = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        hide()
     }
 
     private val binder by lazy { LocalBinder() }
