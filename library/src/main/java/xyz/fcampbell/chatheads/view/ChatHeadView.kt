@@ -1,8 +1,6 @@
 package xyz.fcampbell.chatheads.view
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -43,7 +41,6 @@ class ChatHeadView @JvmOverloads constructor(
         chatHeadPages.apply {
             adapter = chatHeadAdapter.pageAdapter
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
-            background = ColorDrawable(Color.TRANSPARENT)
         }
         root.addView(chatHeadPages)
 
