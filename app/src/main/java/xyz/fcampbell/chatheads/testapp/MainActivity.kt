@@ -11,24 +11,29 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.onClick
 import xyz.fcampbell.chatheads.ChatHeadService
-import xyz.fcampbell.chatheads.view.ChatHead
 import xyz.fcampbell.chatheads.view.ChatHeadAdapter
+import xyz.fcampbell.chatheads.view.ChatHeadListAdapter
 import xyz.fcampbell.chatheads.view.ChatHeadView
 
 class MainActivity : AppCompatActivity() {
 
+    private var boundToService = false
+
     val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            boundToService = true
+
             val chatHeadService = (service as ChatHeadService.LocalBinder).service
 
             addView.onClick {
                 val chatHeadView = ChatHeadView(this@MainActivity)
                 chatHeadView.initialize(prepareDummyChatHeads())
-                chatHeadService.show(chatHeadView)
+                chatHeadService.attachView(chatHeadView)
+                chatHeadService.openChatHeads()
             }
 
             removeView.onClick {
-                chatHeadService.hide()
+                chatHeadService.detachView()
             }
         }
 
@@ -43,22 +48,24 @@ class MainActivity : AppCompatActivity() {
         chatHeadView.initialize(prepareDummyChatHeads())
         setContentView(chatHeadView)
 
+        chatHeadView.open()
+
 //        bindService(Intent(this, ChatHeadService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
     fun prepareDummyChatHeads(): ChatHeadAdapter {
         val dummyDrawable = resources.getDrawable(R.drawable.ic_android_black_48dp, null)
         val chatHeads = listOf(
-                ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 1"; background = ColorDrawable(Color.RED) }),
-                ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 2"; background = ColorDrawable(Color.BLUE) }),
-                ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 3"; background = ColorDrawable(Color.WHITE) }))
+                ChatHeadListAdapter.ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 1"; background = ColorDrawable(Color.RED) }),
+                ChatHeadListAdapter.ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 2"; background = ColorDrawable(Color.BLUE) }),
+                ChatHeadListAdapter.ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 3"; background = ColorDrawable(Color.WHITE) }))
 
 
-        return ChatHeadAdapter(chatHeads)
+        return ChatHeadListAdapter(chatHeads)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        unbindService(serviceConnection)
+        if (boundToService) unbindService(serviceConnection)
     }
 }

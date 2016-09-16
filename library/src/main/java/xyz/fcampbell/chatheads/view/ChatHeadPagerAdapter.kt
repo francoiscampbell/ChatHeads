@@ -7,16 +7,21 @@ import android.view.ViewGroup
 /**
  * Adapts a ChatHead's page property into a ViewPager
  */
-class ChatHeadPagerAdapter(val chatHeads: List<ChatHead>) : PagerAdapter() {
+class ChatHeadPagerAdapter(val delegate: ChatHeadPagerAdapter.Delegate) : PagerAdapter() {
     override fun instantiateItem(container: ViewGroup, position: Int): View {
-        val page = chatHeads[position].page
+        val page = delegate.getPage(position)
         container.addView(page)
         return page
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) = container.removeView(`object` as View)
 
-    override fun getCount() = chatHeads.size
+    override fun getCount() = delegate.getPageCount()
 
     override fun isViewFromObject(view: View, `object`: Any) = view === `object`
+
+    interface Delegate {
+        fun getPageCount(): Int
+        fun getPage(position: Int): View
+    }
 }

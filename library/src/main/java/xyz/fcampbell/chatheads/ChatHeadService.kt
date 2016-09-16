@@ -28,9 +28,9 @@ class ChatHeadService : Service() {
 
     /**
      * Shows a ChatHeadView as a floating view.
-     * @param view The root layout to show.
+     * @param view The root layout to attachView.
      */
-    fun show(view: ChatHeadView) {
+    fun attachView(view: ChatHeadView) {
         if (rootView != null) {
             windowManager.removeView(rootView)
         }
@@ -41,17 +41,27 @@ class ChatHeadService : Service() {
     /**
      * Removes an already-added ChatHeadView.
      */
-    fun hide() {
+    fun detachView() {
         if (rootView == null) return
 
         windowManager.removeView(rootView)
         rootView = null
     }
 
+    /**
+     * Opens the chat head panel
+     */
+    fun openChatHeads() = rootView?.open()
+
+    /**
+     * Closes the chat head panel to thumbnail form
+     */
+    fun closeChatHeads() = rootView?.close()
+
     override fun onDestroy() {
         super.onDestroy()
 
-        hide()
+        detachView()
     }
 
     private val binder by lazy { LocalBinder() }
