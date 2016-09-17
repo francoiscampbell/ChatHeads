@@ -60,10 +60,6 @@ class ChatHeadListAdapter(
      */
     override fun getPage(position: Int) = chatHeads[position].page
 
-    override fun onChatHeadSelected(position: Int) {
-
-    }
-
     /**
      * A chat head. This is just a convenience class to be used with ChatHeadListAdapter.
      *

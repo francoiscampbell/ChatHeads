@@ -27,9 +27,14 @@ abstract class ChatHeadAdapter(
     override fun getPageCount() = getChatHeadCount()
     abstract override fun getPage(position: Int): View
 
-    abstract fun onChatHeadSelected(position: Int)
-//    abstract fun onOpen()
-//    abstract fun onClose()
+    open fun onChatHeadSelected(position: Int) {
+    }
+
+    open fun onOpen() {
+    }
+
+    open fun onClose() {
+    }
 
     fun notifyDataSetChanged() {
         iconAdapter.notifyDataSetChanged()
