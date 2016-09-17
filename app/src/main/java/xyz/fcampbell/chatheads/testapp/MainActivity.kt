@@ -43,25 +43,28 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        setContentView(R.layout.activity_main)
+//        bindService(Intent(this, ChatHeadService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
 
         val chatHeadView = ChatHeadView(this@MainActivity)
         chatHeadView.initialize(prepareDummyChatHeads())
         setContentView(chatHeadView)
-
         chatHeadView.open()
-
-//        bindService(Intent(this, ChatHeadService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
     fun prepareDummyChatHeads(): ChatHeadAdapter {
-        val dummyDrawable = resources.getDrawable(R.drawable.ic_android_black_48dp, null)
-        val chatHeads = listOf(
-                ChatHeadListAdapter.ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 1"; background = ColorDrawable(Color.RED) }),
-                ChatHeadListAdapter.ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 2"; background = ColorDrawable(Color.BLUE) }),
-                ChatHeadListAdapter.ChatHead(dummyDrawable, TextView(this).apply { text = "Chat head 3"; background = ColorDrawable(Color.WHITE) }))
+        val chatHeads = listOf(ChatHeadListAdapter.ChatHead(
+                resources.getDrawable(R.drawable.ic_filter_1_black_48dp, null),
+                TextView(this).apply { text = "Chat head 1"; background = ColorDrawable(Color.RED) }
+        ), ChatHeadListAdapter.ChatHead(
+                resources.getDrawable(R.drawable.ic_filter_2_black_48dp, null),
+                TextView(this).apply { text = "Chat head 2"; background = ColorDrawable(Color.BLUE) }
+        ), ChatHeadListAdapter.ChatHead(
+                resources.getDrawable(R.drawable.ic_filter_3_black_48dp, null),
+                TextView(this).apply { text = "Chat head 3"; background = ColorDrawable(Color.WHITE) }
+        ))
 
-
-        return ChatHeadListAdapter(chatHeads, R.layout.layout_icon, R.id.iconImage)
+        return ChatHeadListAdapter(chatHeads, null, R.layout.layout_icon, R.id.iconImage)
     }
 
     override fun onDestroy() {

@@ -17,9 +17,10 @@ import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
  */
 class ChatHeadListAdapter(
         private val chatHeads: List<ChatHead>,
+        thumbnail: View?,
         @LayoutRes iconLayout: Int,
         @IdRes private val iconImageId: Int
-) : ChatHeadAdapter(iconLayout) {
+) : ChatHeadAdapter(thumbnail, iconLayout) {
 
     /**
      * Convenience class to adapt a List or array of ChatHeads. A basic ChatHead class is also included.
@@ -31,9 +32,10 @@ class ChatHeadListAdapter(
      */
     constructor(
             chatHeads: Array<ChatHead>,
+            thumbnail: View?,
             @LayoutRes iconLayout: Int,
             @IdRes iconImageId: Int
-    ) : this(chatHeads.toList(), iconLayout, iconImageId)
+    ) : this(chatHeads.toList(), thumbnail, iconLayout, iconImageId)
 
     /**
      * @return The number of chat heads in your dataset
@@ -57,6 +59,10 @@ class ChatHeadListAdapter(
      * @return The View to show as a page for position
      */
     override fun getPage(position: Int) = chatHeads[position].page
+
+    override fun onChatHeadSelected(position: Int) {
+
+    }
 
     /**
      * A chat head. This is just a convenience class to be used with ChatHeadListAdapter.

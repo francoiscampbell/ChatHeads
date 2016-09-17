@@ -2,12 +2,12 @@ package xyz.fcampbell.chatheads.view
 
 import android.content.Context
 import android.support.v4.view.ViewPager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
-import android.view.animation.OvershootInterpolator
+import android.view.View
 import android.widget.FrameLayout
-import android.widget.LinearLayout
+import android.widget.ImageView
+import org.jetbrains.anko.layoutInflater
+import xyz.fcampbell.chatheads.R
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 /**
@@ -22,112 +22,31 @@ class ChatHeadView @JvmOverloads constructor(
         attrs,
         defStyleAttr) {
 
-    companion object {
-        const val TAG = "ChatHeadView"
-    }
+    private val root = context.layoutInflater.inflate(R.layout.layout_chat_head_view, null)
+    private val thumbnail = root.findViewById(R.id.thumbnail) as FrameLayout
+    private val defaultThumbnail = root.findViewById(R.id.defaultThumbnail) as ImageView
+    private val icons = root.findViewById(R.id.icons) as CollapsingRecyclerView
+    private val pages = root.findViewById(R.id.pages) as ViewPager
 
-    private val root = LinearLayout(context, attrs, defStyleAttr)
-    private val chatHeadIcons = RecyclerView(context, attrs, defStyleAttr)
-    private val chatHeadPages = ViewPager(context, attrs)
-
-    private val orchestrator = Orchestrator(context, chatHeadIcons, chatHeadPages, true)
+    private val orchestrator = ChatHeadOrchestrator(thumbnail, icons, pages)
 
     init {
-        removeAllViews() //We don't care about children
+        removeAllViews() //Remove any children set in XML
+        addView(root)
     }
 
-    fun initialize(chatHeadAdapter: ChatHeadAdapter) {
-        root.orientation = LinearLayout.VERTICAL
+    fun initialize(adapter: ChatHeadAdapter) {
+        setThumbnail(adapter.thumbnail)
+        adapter.onThumbnailChangedListener = { setThumbnail(adapter.thumbnail) }
+        orchestrator.setup(adapter)
+    }
 
-        orchestrator.setup(chatHeadAdapter)
-        root.addView(chatHeadIcons)
-        root.addView(chatHeadPages)
-
-        addView(root)
+    private fun setThumbnail(thumbnail: View?) {
+        this.thumbnail.removeAllViews()
+        this.thumbnail.addView(thumbnail ?: defaultThumbnail)
     }
 
     fun open() = orchestrator.open()
 
     fun close() = orchestrator.close()
-
-    class Orchestrator @JvmOverloads constructor(
-            context: Context,
-            private val icons: RecyclerView,
-            private val pages: ViewPager,
-            var opened: Boolean = false) {
-
-        private val onChatHeadIconClickedListener = { position: Int ->
-            if (opened) {
-                if (position == pages.currentItem) { //If we click on the current icon
-                    close()
-                } else {
-                    pages.setCurrentItem(position, true)
-                }
-            } else {
-                open()
-            }
-        }
-
-        private val onChatHeadPageChangeListener = object : ViewPager.OnPageChangeListener {
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {
-            }
-
-            override fun onPageSelected(position: Int) = icons.smoothScrollToPosition(position)
-        }
-
-        private val collapsingLinearLayoutManager = CollapsingLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-
-        fun setup(chatHeadAdapter: ChatHeadAdapter) {
-            val iconAdapter = chatHeadAdapter.iconAdapter
-            iconAdapter.chatHeadClickedListener = onChatHeadIconClickedListener
-            icons.apply {
-                adapter = iconAdapter
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                layoutManager = collapsingLinearLayoutManager
-            }
-
-            pages.apply {
-                addOnPageChangeListener(onChatHeadPageChangeListener)
-                adapter = chatHeadAdapter.pageAdapter
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
-            }
-        }
-
-        fun open() {
-            if (opened) return
-
-            animatePagesScale(1f)
-            collapsingLinearLayoutManager.expand()
-
-            opened = true
-        }
-
-        fun close() {
-            if (!opened) return
-
-            animatePagesScale(0f)
-            collapsingLinearLayoutManager.collapse()
-
-            opened = false
-        }
-
-        fun animatePagesScale(finalScale: Float) {
-            pages.pivotX = 0f
-            pages.pivotY = 0f
-            pages.animate()
-                    .scaleX(finalScale)
-                    .scaleY(finalScale)
-                    .setDuration(300)
-                    .setInterpolator(OvershootInterpolator(0.5f))
-                    .start()
-        }
-
-        fun selectChatHead(position: Int) {
-            icons.smoothScrollToPosition(position)
-            pages.setCurrentItem(position, true)
-        }
-    }
 }

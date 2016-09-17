@@ -2,6 +2,7 @@ package xyz.fcampbell.chatheads
 
 import android.app.Service
 import android.content.Intent
+import android.graphics.PixelFormat
 import android.os.Binder
 import android.os.IBinder
 import android.view.Gravity
@@ -17,10 +18,11 @@ class ChatHeadService : Service() {
         gravity = Gravity.START or Gravity.TOP
         x = 0
         y = 0
-        width = WindowManager.LayoutParams.MATCH_PARENT
-        height = WindowManager.LayoutParams.MATCH_PARENT
+        width = WindowManager.LayoutParams.WRAP_CONTENT
+        height = WindowManager.LayoutParams.WRAP_CONTENT
         type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
         flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        format = PixelFormat.TRANSLUCENT
     }
 
     var rootView: ChatHeadView? = null

@@ -1,31 +1,30 @@
 package xyz.fcampbell.chatheads.view
 
 import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.util.AttributeSet
 import android.view.View
 import android.view.animation.OvershootInterpolator
 
 /**
  * LinearLayoutManager than can collapse all its items onto the first one
  */
-class CollapsingLinearLayoutManager(
+class CollapsingRecyclerView @JvmOverloads constructor(
         context: Context,
-        orientation: Int,
-        reverseLayout: Boolean
-) : LinearLayoutManager(
-        context,
-        orientation,
-        reverseLayout) {
+        attrs: AttributeSet? = null,
+        defStyle: Int = 0
+) : RecyclerView(context, attrs, defStyle) {
 
     fun collapse() {
-        val firstChildX = getChildAt(0).x
-        val firstChildY = getChildAt(0).y
-
-        forEachChild { it.animateChildTranslation(firstChildX - it.x, firstChildY - it.y) }
+        forEachChildIndexed { child, index ->
+            child.animateChildTranslation(-child.x - x, -child.y - y)
+        }
     }
 
     fun expand() {
-        forEachChild { it.animateChildTranslation(0f) }
+        forEachChildIndexed { child, index ->
+            child.animateChildTranslation(0f)
+        }
     }
 
     fun View.animateChildTranslation(targetTranslation: Float) = animateChildTranslation(targetTranslation, targetTranslation)
@@ -38,7 +37,7 @@ class CollapsingLinearLayoutManager(
                 .start()
     }
 
-    inline fun forEachChild(action: (View) -> Unit) {
-        for (i in 0..childCount - 1) action(getChildAt(i))
+    inline fun forEachChildIndexed(action: (View, Int) -> Unit) {
+        for (i in 0..childCount - 1) action(getChildAt(i), i)
     }
 }
