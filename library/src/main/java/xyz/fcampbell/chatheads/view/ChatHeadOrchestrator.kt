@@ -11,7 +11,7 @@ import kotlin.properties.Delegates
 /**
  * Orchestrates between the RecyclerView and the ViewPager
  */
-class ChatHeadOrchestrator @JvmOverloads constructor(
+internal class ChatHeadOrchestrator @JvmOverloads constructor(
         private val thumbnail: View,
         private val icons: CollapsingRecyclerView,
         private val pages: ViewPager,

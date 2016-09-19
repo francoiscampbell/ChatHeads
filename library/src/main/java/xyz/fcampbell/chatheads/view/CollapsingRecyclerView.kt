@@ -9,7 +9,7 @@ import android.view.animation.OvershootInterpolator
 /**
  * LinearLayoutManager than can collapse all its items onto the first one
  */
-class CollapsingRecyclerView @JvmOverloads constructor(
+internal class CollapsingRecyclerView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyle: Int = 0
@@ -25,6 +25,7 @@ class CollapsingRecyclerView @JvmOverloads constructor(
         forEachChildIndexed { child, index ->
             child.animateChildTranslation(0f)
         }
+
     }
 
     fun View.animateChildTranslation(targetTranslation: Float) = animateChildTranslation(targetTranslation, targetTranslation)
