@@ -28,18 +28,18 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     })
     var onStateChangeListener: ((State) -> Unit)? = null
 
-    private val onThumbnailClickedListener = { thumbnail: View ->
+    private val onThumbnailClickListener = { thumbnail: View ->
         when (state) {
             State.OPEN, State.OPENING -> close()
             State.CLOSED, State.CLOSING -> open()
         }
     }
 
-    private val onChatHeadIconClickedListener = { position: Int ->
+    private val onIconClickListener = { position: Int ->
         if (state == State.OPEN) pages.setCurrentItem(position, true)
     }
 
-    private val onChatHeadPageChangeListener = object : ViewPager.OnPageChangeListener {
+    private val onPageChangeListener = object : ViewPager.OnPageChangeListener {
         override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
         }
 
@@ -52,9 +52,9 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     fun setup(chatHeadAdapter: ChatHeadAdapter) {
         adapter = chatHeadAdapter
 
-        thumbnail.setOnClickListener(onThumbnailClickedListener)
+        thumbnail.setOnClickListener(onThumbnailClickListener)
 
-        chatHeadAdapter.iconAdapter.chatHeadClickedListener = onChatHeadIconClickedListener
+        chatHeadAdapter.iconAdapter.chatHeadClickedListener = onIconClickListener
         icons.apply {
             adapter = chatHeadAdapter.iconAdapter
             layoutParams = LinearLayout.LayoutParams(
@@ -64,7 +64,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         }
 
         pages.apply {
-            addOnPageChangeListener(onChatHeadPageChangeListener)
+            addOnPageChangeListener(onPageChangeListener)
             adapter = chatHeadAdapter.pageAdapter
             layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -74,8 +74,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
 
     fun open() {
         if (state == State.OPEN || state == State.OPENING) return
-        state = State.OPENING
 
+        state = State.OPENING
         animatePagesScale(1f, { state = State.OPEN })
         icons.expand()
     }
@@ -83,8 +83,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
 
     fun close() {
         if (state == State.CLOSED || state == State.CLOSING) return
-        state = State.CLOSING
 
+        state = State.CLOSING
         animatePagesScale(0f, { state = State.CLOSED })
         icons.collapse()
     }
