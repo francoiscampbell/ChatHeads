@@ -1,19 +1,21 @@
 package xyz.fcampbell.chatheads
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Binder
 import android.os.IBinder
 import android.view.Gravity
 import android.view.WindowManager
-import org.jetbrains.anko.windowManager
 import xyz.fcampbell.chatheads.view.ChatHeadView
 
 /**
  * The main Service to manage chat heads.
  */
 class ChatHeadService : Service() {
+    val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
     private val layoutParams = WindowManager.LayoutParams().apply {
         gravity = Gravity.START or Gravity.TOP
         x = 0

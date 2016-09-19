@@ -30,7 +30,13 @@ abstract class ChatHeadAdapter(
     open fun onChatHeadSelected(position: Int) {
     }
 
+    open fun onOpening() {
+    }
+
     open fun onOpen() {
+    }
+
+    open fun onClosing() {
     }
 
     open fun onClose() {

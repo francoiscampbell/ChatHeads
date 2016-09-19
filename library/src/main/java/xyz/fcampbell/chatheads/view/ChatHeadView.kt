@@ -3,10 +3,10 @@ package xyz.fcampbell.chatheads.view
 import android.content.Context
 import android.support.v4.view.ViewPager
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
-import org.jetbrains.anko.layoutInflater
 import xyz.fcampbell.chatheads.R
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
@@ -21,8 +21,9 @@ class ChatHeadView @JvmOverloads constructor(
         context,
         attrs,
         defStyleAttr) {
+    val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    private val root = context.layoutInflater.inflate(R.layout.layout_chat_head_view, null)
+    private val root = layoutInflater.inflate(R.layout.layout_chat_head_view, null)
     private val thumbnailContainer = root.findViewById(R.id.thumbnailContainer) as FrameLayout
     private val defaultThumbnail = root.findViewById(R.id.defaultThumbnail) as ImageView
     private val icons = root.findViewById(R.id.icons) as CollapsingRecyclerView
@@ -38,6 +39,7 @@ class ChatHeadView @JvmOverloads constructor(
     fun initialize(adapter: ChatHeadAdapter) {
         setThumbnail(adapter.thumbnail)
         adapter.onThumbnailChangedListener = { setThumbnail(adapter.thumbnail) }
+
         orchestrator.setup(adapter)
     }
 
@@ -49,4 +51,5 @@ class ChatHeadView @JvmOverloads constructor(
     fun open() = orchestrator.open()
 
     fun close() = orchestrator.close()
+
 }

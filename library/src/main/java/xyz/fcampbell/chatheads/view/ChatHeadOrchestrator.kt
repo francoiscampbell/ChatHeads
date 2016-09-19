@@ -15,18 +15,21 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         private val thumbnail: View,
         private val icons: CollapsingRecyclerView,
         private val pages: ViewPager,
-        initialState: State = State.CLOSED
-) {
+        initialState: State = ChatHeadOrchestrator.State.CLOSED) {
     private lateinit var adapter: ChatHeadAdapter
 
-    enum class State {
+    enum class State { //Nested class in ChatHeadView to be in public API
         CLOSED, OPENING, OPEN, CLOSING
     }
 
-    var state: State by Delegates.observable(initialState, { property, oldState, newState ->
-        onStateChangeListener?.invoke(newState)
+    private var state: State by Delegates.observable(initialState, { property, oldState, newState ->
+        when (newState) {
+            ChatHeadOrchestrator.State.CLOSED -> adapter.onClose()
+            ChatHeadOrchestrator.State.OPENING -> adapter.onOpening()
+            ChatHeadOrchestrator.State.OPEN -> adapter.onOpen()
+            ChatHeadOrchestrator.State.CLOSING -> adapter.onClosing()
+        }
     })
-    var onStateChangeListener: ((State) -> Unit)? = null
 
     private val onThumbnailClickListener = { thumbnail: View ->
         when (state) {
@@ -36,7 +39,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     }
 
     private val onIconClickListener = { position: Int ->
-        if (state == State.OPEN) pages.setCurrentItem(position, true)
+        if (state == State.OPEN) selectChatHead(position)
     }
 
     private val onPageChangeListener = object : ViewPager.OnPageChangeListener {
@@ -46,7 +49,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         override fun onPageScrollStateChanged(state: Int) {
         }
 
-        override fun onPageSelected(position: Int) = icons.smoothScrollToPosition(position)
+        override fun onPageSelected(position: Int) = selectChatHead(position)
     }
 
     fun setup(chatHeadAdapter: ChatHeadAdapter) {
@@ -72,6 +75,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         }
     }
 
+
     fun open() {
         if (state == State.OPEN || state == State.OPENING) return
 
@@ -79,7 +83,6 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         animatePagesScale(1f, { state = State.OPEN })
         icons.expand()
     }
-
 
     fun close() {
         if (state == State.CLOSED || state == State.CLOSING) return
@@ -105,6 +108,6 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         icons.smoothScrollToPosition(position)
         pages.setCurrentItem(position, true)
 
-        state = State.OPEN
+        adapter.onChatHeadSelected(position)
     }
 }
