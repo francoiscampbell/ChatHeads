@@ -23,12 +23,12 @@ class ChatHeadView @JvmOverloads constructor(
         defStyleAttr) {
 
     private val root = context.layoutInflater.inflate(R.layout.layout_chat_head_view, null)
-    private val thumbnail = root.findViewById(R.id.thumbnail) as FrameLayout
+    private val thumbnailContainer = root.findViewById(R.id.thumbnailContainer) as FrameLayout
     private val defaultThumbnail = root.findViewById(R.id.defaultThumbnail) as ImageView
     private val icons = root.findViewById(R.id.icons) as CollapsingRecyclerView
     private val pages = root.findViewById(R.id.pages) as ViewPager
 
-    private val orchestrator = ChatHeadOrchestrator(thumbnail, icons, pages)
+    private val orchestrator = ChatHeadOrchestrator(thumbnailContainer, icons, pages)
 
     init {
         removeAllViews() //Remove any children set in XML
@@ -42,8 +42,8 @@ class ChatHeadView @JvmOverloads constructor(
     }
 
     private fun setThumbnail(thumbnail: View?) {
-        this.thumbnail.removeAllViews()
-        this.thumbnail.addView(thumbnail ?: defaultThumbnail)
+        this.thumbnailContainer.removeAllViews()
+        this.thumbnailContainer.addView(thumbnail ?: defaultThumbnail)
     }
 
     fun open() = orchestrator.open()
