@@ -15,32 +15,32 @@ internal class CollapsingRecyclerView @JvmOverloads constructor(
 ) : RecyclerView(context, attrs, defStyle) {
 
     fun collapseWithAnimation() {
-        forEachChildIndexed { child, index ->
+        forEachChild { child ->
             child.animate()
                     .translationX(-child.x)
                     .translationY(-child.y)
                     .alpha(0f)
                     .setDuration(ChatHeadOrchestrator.CLOSE_ANIMATION_DURATION)
                     .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
-                    .withEndAction { visibility = View.GONE }
+//                    .withEndAction { visibility = View.GONE }
                     .start()
         }
     }
 
     fun expandWithAnimation() {
-        forEachChildIndexed { child, index ->
+        forEachChild { child ->
             child.animate()
                     .translationX(0f)
                     .translationY(0f)
                     .alpha(1f)
                     .setDuration(ChatHeadOrchestrator.OPEN_ANIMATION_DURATION)
                     .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
-                    .withStartAction { visibility = View.VISIBLE }
+//                    .withStartAction { visibility = View.VISIBLE }
                     .start()
         }
     }
 
-    inline fun forEachChildIndexed(action: (View, Int) -> Unit) {
-        for (i in 0..childCount - 1) action(getChildAt(i), i)
+    inline fun forEachChild(action: (View) -> Unit) {
+        for (i in 0..childCount - 1) action(getChildAt(i))
     }
 }

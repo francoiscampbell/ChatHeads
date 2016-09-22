@@ -27,12 +27,12 @@ internal class ChatHeadIconAdapter(
         holder.itemView.setOnClickListener { chatHeadClickedListener(position) }
     }
 
-    override fun getItemCount(): Int = delegate.getIconCount()
+    override fun getItemCount(): Int = delegate.getItemCount()
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     interface Delegate {
-        fun getIconCount(): Int
+        fun getItemCount(): Int
         fun bindIcon(icon: View, position: Int)
     }
 }

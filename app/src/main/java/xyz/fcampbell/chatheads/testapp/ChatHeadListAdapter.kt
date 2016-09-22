@@ -1,10 +1,11 @@
-package xyz.fcampbell.chatheads.view.impl
+package xyz.fcampbell.chatheads.testapp
 
 import android.graphics.drawable.Drawable
 import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 /**
@@ -17,15 +18,13 @@ import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
  */
 class ChatHeadListAdapter(
         private val chatHeads: List<ChatHead>,
-        thumbnail: View?,
         @LayoutRes iconLayout: Int,
-        @IdRes private val iconImageId: Int
-) : ChatHeadAdapter(thumbnail, iconLayout) {
+        @LayoutRes pageLayout: Int,
+        @IdRes private val iconImageId: Int,
+        @IdRes private val pageTextViewId: Int
+) : ChatHeadAdapter(iconLayout, pageLayout) {
 
-    /**
-     * @return The number of chat heads in your dataset
-     */
-    override fun getChatHeadCount() = chatHeads.size
+    override fun getItemCount(): Int = chatHeads.size
 
     /**
      * Bind data to an icon view.
@@ -43,14 +42,16 @@ class ChatHeadListAdapter(
      * @param position The position of the chat head in the dataset
      * @return The View to show as a page for position
      */
-    override fun getPage(position: Int) = chatHeads[position].page
+    override fun bindPage(page: View, position: Int) {
+        (page.findViewById(pageTextViewId) as TextView).text = chatHeads[position].text
+    }
 
     /**
      * A chat head. This is just a convenience class to be used with ChatHeadListAdapter.
      *
-     * @param icon The icon to attachView in the top bar
-     * @param page The view to attachView in the expanded panel
+     * @param icon The icon to show in the top bar
+     * @param text The text to show in the expanded panel
      */
     data class ChatHead(val icon: Drawable,
-                        val page: View)
+                        val text: String)
 }

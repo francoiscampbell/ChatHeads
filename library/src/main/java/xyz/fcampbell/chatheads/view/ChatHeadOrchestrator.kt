@@ -1,5 +1,6 @@
 package xyz.fcampbell.chatheads.view
 
+import android.animation.TimeInterpolator
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
@@ -11,13 +12,13 @@ import kotlin.properties.Delegates
  * Orchestrates between the RecyclerView and the ViewPager
  */
 internal class ChatHeadOrchestrator @JvmOverloads constructor(
-        private val thumbnail: View,
+        private val thumbnailContainer: View,
         private val icons: CollapsingRecyclerView,
         private val pages: ViewPager,
         initialState: State = ChatHeadOrchestrator.State.CLOSED) {
     private lateinit var adapter: ChatHeadAdapter
 
-    enum class State { //Nested class in ChatHeadView to be in public API
+    internal enum class State {
         CLOSED, OPENING, OPEN, CLOSING
     }
 
@@ -60,7 +61,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     fun setup(chatHeadAdapter: ChatHeadAdapter) {
         adapter = chatHeadAdapter
 
-        thumbnail.apply {
+        thumbnailContainer.apply {
             setOnClickListener(onThumbnailClickListener)
             visibility = when (state) {
                 ChatHeadOrchestrator.State.OPEN -> View.GONE
@@ -72,6 +73,10 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         icons.apply {
             adapter = chatHeadAdapter.iconAdapter
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            visibility = when (state) {
+                ChatHeadOrchestrator.State.CLOSED -> View.GONE
+                else -> View.VISIBLE
+            }
 
             //offset the child drawing by 1 and return the first child on the last drawing iteration to keep it in front
             setChildDrawingOrderCallback { childCount, iteration -> (iteration + 1) % childCount }
@@ -80,6 +85,10 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         pages.apply {
             addOnPageChangeListener(onPageChangeListener)
             adapter = chatHeadAdapter.pageAdapter
+            visibility = when (state) {
+                ChatHeadOrchestrator.State.CLOSED -> View.GONE
+                else -> View.VISIBLE
+            }
         }
     }
 
@@ -94,16 +103,18 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .alpha(1f)
                 .setDuration(OPEN_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withStartAction { pages.visibility = View.VISIBLE }
+                .withStartAction {
+                    icons.visibility = View.VISIBLE
+                    pages.visibility = View.VISIBLE
+                }
                 .withEndAction({ state = State.OPEN })
                 .start()
 
-        thumbnail.animate()
+        thumbnailContainer.animate()
                 .alpha(0f)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withEndAction({ thumbnail.visibility = View.GONE })
+                .withEndAction({ thumbnailContainer.visibility = View.GONE })
                 .start()
-
 
         icons.expandWithAnimation()
     }
@@ -121,14 +132,16 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withEndAction({
                     state = State.CLOSED
+                    icons.visibility = View.GONE
                     pages.visibility = View.GONE
                 })
                 .start()
 
-        thumbnail.animate()
+        adapter.bindThumbnail(thumbnailContainer)
+        thumbnailContainer.animate()
                 .alpha(1f)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withStartAction({ thumbnail.visibility = View.VISIBLE })
+                .withStartAction({ thumbnailContainer.visibility = View.VISIBLE })
                 .start()
 
         icons.collapseWithAnimation()
@@ -150,6 +163,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         const val OPEN_ANIMATION_DURATION = 100L
         const val CLOSE_ANIMATION_DURATION = 100L
 
-        val ANIMATION_INTERPOLATOR = OvershootInterpolator(0.5f)
+        val ANIMATION_INTERPOLATOR: TimeInterpolator
+            get() = OvershootInterpolator(0.5f)//new instance every time to run simultaneous animations
     }
 }

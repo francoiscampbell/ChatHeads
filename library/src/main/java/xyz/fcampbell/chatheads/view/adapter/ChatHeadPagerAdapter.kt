@@ -1,27 +1,35 @@
 package xyz.fcampbell.chatheads.view.adapter
 
-import android.support.v4.view.PagerAdapter
+import android.content.Context
+import android.support.annotation.LayoutRes
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import me.henrytao.recyclerpageradapter.RecyclerPagerAdapter
 
 /**
  * Adapts a ChatHead's page property into a ViewPager
  */
-internal class ChatHeadPagerAdapter(val delegate: Delegate) : PagerAdapter() {
-    override fun instantiateItem(container: ViewGroup, position: Int): View {
-        val page = delegate.getPage(position)
-        container.addView(page)
-        return page
+internal class ChatHeadPagerAdapter(
+        @LayoutRes val pageLayout: Int,
+        val delegate: Delegate
+) : RecyclerPagerAdapter<ChatHeadPagerAdapter.ViewHolder>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val layoutInflater = parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val pageView = layoutInflater.inflate(pageLayout, parent, false)
+        return ViewHolder(pageView)
     }
 
-    override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) = container.removeView(`object` as View)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        delegate.bindPage(holder.itemView, position)
+    }
 
-    override fun getCount() = delegate.getPageCount()
+    override fun getItemCount() = delegate.getItemCount()
 
-    override fun isViewFromObject(view: View, `object`: Any) = view === `object`
+    internal class ViewHolder(itemView: View) : RecyclerPagerAdapter.ViewHolder(itemView)
 
     interface Delegate {
-        fun getPageCount(): Int
-        fun getPage(position: Int): View
+        fun getItemCount(): Int
+        fun bindPage(page: View, position: Int)
     }
 }

@@ -2,17 +2,14 @@ package xyz.fcampbell.chatheads.testapp
 
 import android.content.ComponentName
 import android.content.ServiceConnection
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.onClick
 import xyz.fcampbell.chatheads.ChatHeadService
 import xyz.fcampbell.chatheads.view.ChatHeadView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
-import xyz.fcampbell.chatheads.view.impl.ChatHeadListAdapter
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,14 +49,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun prepareDummyChatHeads(): ChatHeadAdapter {
-        val chatHeads = (0..23).map { i ->
-            ChatHeadListAdapter.ChatHead(
-                    resources.getDrawable(R.drawable.ic_filter_1_black_48dp, null),
-                    TextView(this).apply { text = "Chat head $i"; background = ColorDrawable((0b1111 shl i) or (0xFF shl 24)) }
-            )
-        }.toList()
+        val icon = resources.getDrawable(R.drawable.ic_filter_1_black_48dp, null)
+        val chatHeads = (0..23).map { ChatHeadListAdapter.ChatHead(icon, "Chat head $it") }.toList()
 
-        return ChatHeadListAdapter(chatHeads, null, R.layout.layout_icon, R.id.iconImage)
+        return ChatHeadListAdapter(chatHeads, R.layout.layout_icon, R.layout.layout_page, R.id.iconImage, R.id.pageText)
     }
 
     override fun onDestroy() {

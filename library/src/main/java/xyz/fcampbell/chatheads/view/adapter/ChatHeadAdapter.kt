@@ -1,45 +1,47 @@
 package xyz.fcampbell.chatheads.view.adapter
 
 import android.support.annotation.LayoutRes
+import android.util.Log
 import android.view.View
-import kotlin.properties.Delegates
+import android.widget.ImageView
+import xyz.fcampbell.chatheads.R
 
 /**
  * Adapts a data set into an icon and a page to be shown when the icon is expanded
  */
 abstract class ChatHeadAdapter(
-        thumbnail: View?,
-        @LayoutRes private val iconLayout: Int
+        @LayoutRes private val iconLayout: Int,
+        @LayoutRes private val pageLayout: Int
 ) : ChatHeadIconAdapter.Delegate, ChatHeadPagerAdapter.Delegate {
     internal val iconAdapter = ChatHeadIconAdapter(iconLayout, this)
-    internal val pageAdapter = ChatHeadPagerAdapter(this)
+    internal val pageAdapter = ChatHeadPagerAdapter(pageLayout, this)
 
-    var thumbnail: View? by Delegates.observable(thumbnail, { property, oldValue, newValue ->
-        onThumbnailChangedListener?.invoke()
-    })
-    internal var onThumbnailChangedListener: (() -> Unit)? = null
-
-    abstract fun getChatHeadCount(): Int
-
-    override fun getIconCount() = getChatHeadCount()
+    abstract override fun getItemCount(): Int
     abstract override fun bindIcon(icon: View, position: Int)
+    abstract override fun bindPage(page: View, position: Int)
 
-    override fun getPageCount() = getChatHeadCount()
-    abstract override fun getPage(position: Int): View
+    open fun bindThumbnail(view: View) {
+        val imageView = view.findViewById(R.id.defaultThumbnail) as ImageView
+        imageView.setImageResource(R.drawable.ic_arrow_back_black_48dp) //TODO get a proper default thumb
+    }
 
     open fun onChatHeadSelected(position: Int) {
     }
 
     open fun onOpening() {
+        Log.i("Adapter", "Opening")
     }
 
     open fun onOpen() {
+        Log.i("Adapter", "Open")
     }
 
     open fun onClosing() {
+        Log.i("Adapter", "Closing")
     }
 
     open fun onClose() {
+        Log.i("Adapter", "Close")
     }
 
     fun notifyDataSetChanged() {
