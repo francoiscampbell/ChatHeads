@@ -14,7 +14,7 @@ import xyz.fcampbell.chatheads.view.ChatHeadView
  * The main Service to manage chat heads.
  */
 class ChatHeadService : Service() {
-    val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    val windowManager by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
 
     private val layoutParams = WindowManager.LayoutParams().apply {
         gravity = Gravity.START or Gravity.TOP

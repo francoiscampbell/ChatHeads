@@ -1,6 +1,8 @@
 package xyz.fcampbell.chatheads.testapp
 
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
@@ -39,13 +41,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_main)
-//        bindService(Intent(this, ChatHeadService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+        setContentView(R.layout.activity_main)
+        bindService(Intent(this, ChatHeadService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
 
-        val chatHeadView = ChatHeadView(this)
-        chatHeadView.initialize(prepareDummyChatHeads())
-        setContentView(chatHeadView)
-        chatHeadView.open()
+//        val chatHeadView = ChatHeadView(this)
+//        chatHeadView.initialize(prepareDummyChatHeads())
+//        setContentView(chatHeadView)
+//        chatHeadView.open()
     }
 
     fun prepareDummyChatHeads(): ChatHeadAdapter {
