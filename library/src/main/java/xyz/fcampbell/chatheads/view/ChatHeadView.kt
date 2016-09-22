@@ -44,8 +44,8 @@ class ChatHeadView @JvmOverloads constructor(
     }
 
     private fun setThumbnail(thumbnail: View?) {
-        this.thumbnailContainer.removeAllViews()
-        this.thumbnailContainer.addView(thumbnail ?: defaultThumbnail)
+        thumbnailContainer.removeAllViews()
+        thumbnailContainer.addView(thumbnail ?: defaultThumbnail)
     }
 
     fun open() = orchestrator.open()

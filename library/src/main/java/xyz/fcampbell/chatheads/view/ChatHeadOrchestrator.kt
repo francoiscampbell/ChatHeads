@@ -4,7 +4,6 @@ import android.support.v4.view.ViewPager
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.view.animation.OvershootInterpolator
-import android.widget.LinearLayout
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 import kotlin.properties.Delegates
 
@@ -39,7 +38,13 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     }
 
     private val onIconClickListener = { position: Int ->
-        if (state == State.OPEN) selectChatHead(position)
+        if (state == State.OPEN) {
+            if (position == pages.currentItem) {
+                close()
+            } else {
+                selectChatHead(position)
+            }
+        }
     }
 
     private val onPageChangeListener = object : ViewPager.OnPageChangeListener {
@@ -55,53 +60,83 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     fun setup(chatHeadAdapter: ChatHeadAdapter) {
         adapter = chatHeadAdapter
 
-        thumbnail.setOnClickListener(onThumbnailClickListener)
+        thumbnail.apply {
+            setOnClickListener(onThumbnailClickListener)
+            visibility = when (state) {
+                ChatHeadOrchestrator.State.OPEN -> View.GONE
+                else -> View.VISIBLE
+            }
+        }
 
         chatHeadAdapter.iconAdapter.chatHeadClickedListener = onIconClickListener
         icons.apply {
             adapter = chatHeadAdapter.iconAdapter
-            layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+            //offset the child drawing by 1 and return the first child on the last drawing iteration to keep it in front
+            setChildDrawingOrderCallback { childCount, iteration -> (iteration + 1) % childCount }
         }
 
         pages.apply {
             addOnPageChangeListener(onPageChangeListener)
             adapter = chatHeadAdapter.pageAdapter
-            layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT)
         }
     }
-
 
     fun open() {
         if (state == State.OPEN || state == State.OPENING) return
 
         state = State.OPENING
-        animatePagesScale(1f, { state = State.OPEN })
-        icons.expand()
+        setPagesPivotToTop()
+        pages.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .alpha(1f)
+                .setDuration(OPEN_ANIMATION_DURATION)
+                .setInterpolator(ANIMATION_INTERPOLATOR)
+                .withStartAction { pages.visibility = View.VISIBLE }
+                .withEndAction({ state = State.OPEN })
+                .start()
+
+        thumbnail.animate()
+                .alpha(0f)
+                .setInterpolator(ANIMATION_INTERPOLATOR)
+                .withEndAction({ thumbnail.visibility = View.GONE })
+                .start()
+
+
+        icons.expandWithAnimation()
     }
 
     fun close() {
         if (state == State.CLOSED || state == State.CLOSING) return
 
         state = State.CLOSING
-        animatePagesScale(0f, { state = State.CLOSED })
-        icons.collapse()
+        setPagesPivotToTop()
+        pages.animate()
+                .scaleX(0.9f)
+                .scaleY(0.9f)
+                .alpha(0f)
+                .setDuration(CLOSE_ANIMATION_DURATION)
+                .setInterpolator(ANIMATION_INTERPOLATOR)
+                .withEndAction({
+                    state = State.CLOSED
+                    pages.visibility = View.GONE
+                })
+                .start()
+
+        thumbnail.animate()
+                .alpha(1f)
+                .setInterpolator(ANIMATION_INTERPOLATOR)
+                .withStartAction({ thumbnail.visibility = View.VISIBLE })
+                .start()
+
+        icons.collapseWithAnimation()
     }
 
-    fun animatePagesScale(finalScale: Float, endAction: () -> Unit) {
-        pages.pivotX = 0f
-        pages.pivotY = 0f
-        pages.animate()
-                .scaleX(finalScale)
-                .scaleY(finalScale)
-                .setDuration(300)
-                .setInterpolator(OvershootInterpolator(0.5f))
-                .withEndAction(endAction)
-                .start()
+    private fun setPagesPivotToTop() {
+        pages.pivotX = (pages.width / 2).toFloat()
+        pages.pivotY = (-icons.height).toFloat()
     }
 
     fun selectChatHead(position: Int) {
@@ -109,5 +144,12 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         pages.setCurrentItem(position, true)
 
         adapter.onChatHeadSelected(position)
+    }
+
+    companion object {
+        const val OPEN_ANIMATION_DURATION = 100L
+        const val CLOSE_ANIMATION_DURATION = 100L
+
+        val ANIMATION_INTERPOLATOR = OvershootInterpolator(0.5f)
     }
 }

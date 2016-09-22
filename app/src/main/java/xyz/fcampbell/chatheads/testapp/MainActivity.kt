@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 //        setContentView(R.layout.activity_main)
 //        bindService(Intent(this, ChatHeadService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
 
-        val chatHeadView = ChatHeadView(this@MainActivity)
+        val chatHeadView = ChatHeadView(this)
         chatHeadView.initialize(prepareDummyChatHeads())
         setContentView(chatHeadView)
         chatHeadView.open()

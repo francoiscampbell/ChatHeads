@@ -4,10 +4,9 @@ import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.View
-import android.view.animation.OvershootInterpolator
 
 /**
- * LinearLayoutManager than can collapse all its items onto the first one
+ * RecyclerView than can collapseWithAnimation all its items onto the first one
  */
 internal class CollapsingRecyclerView @JvmOverloads constructor(
         context: Context,
@@ -15,27 +14,30 @@ internal class CollapsingRecyclerView @JvmOverloads constructor(
         defStyle: Int = 0
 ) : RecyclerView(context, attrs, defStyle) {
 
-    fun collapse() {
+    fun collapseWithAnimation() {
         forEachChildIndexed { child, index ->
-            child.animateChildTranslation(-child.x - x, -child.y - y)
+            child.animate()
+                    .translationX(-child.x)
+                    .translationY(-child.y)
+                    .alpha(0f)
+                    .setDuration(ChatHeadOrchestrator.CLOSE_ANIMATION_DURATION)
+                    .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                    .withEndAction { visibility = View.GONE }
+                    .start()
         }
     }
 
-    fun expand() {
+    fun expandWithAnimation() {
         forEachChildIndexed { child, index ->
-            child.animateChildTranslation(0f)
+            child.animate()
+                    .translationX(0f)
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setDuration(ChatHeadOrchestrator.OPEN_ANIMATION_DURATION)
+                    .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                    .withStartAction { visibility = View.VISIBLE }
+                    .start()
         }
-
-    }
-
-    fun View.animateChildTranslation(targetTranslation: Float) = animateChildTranslation(targetTranslation, targetTranslation)
-
-    fun View.animateChildTranslation(targetTranslationX: Float, targetTranslationY: Float) {
-        animate().translationX(targetTranslationX)
-                .translationY(targetTranslationY)
-                .setDuration(300)
-                .setInterpolator(OvershootInterpolator(0.5f))
-                .start()
     }
 
     inline fun forEachChildIndexed(action: (View, Int) -> Unit) {
