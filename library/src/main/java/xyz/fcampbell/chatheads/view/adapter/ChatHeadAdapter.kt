@@ -22,7 +22,7 @@ abstract class ChatHeadAdapter(
 
     open fun bindThumbnail(view: View) {
         val imageView = view.findViewById(R.id.defaultThumbnail) as ImageView
-        imageView.setImageResource(R.drawable.ic_arrow_back_black_48dp) //TODO get a proper default thumb
+        imageView.setImageResource(R.drawable.ic_default_thumbnail_48dp) //TODO get a proper default thumb
     }
 
     open fun onChatHeadSelected(position: Int) {
