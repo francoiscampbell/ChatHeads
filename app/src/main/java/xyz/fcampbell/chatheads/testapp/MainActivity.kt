@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.onClick
 import xyz.fcampbell.chatheads.ChatHeadService
-import xyz.fcampbell.chatheads.view.ChatHeadView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 class MainActivity : AppCompatActivity() {
@@ -24,9 +23,8 @@ class MainActivity : AppCompatActivity() {
             val chatHeadService = (service as ChatHeadService.LocalBinder).service
 
             addView.onClick {
-                val chatHeadView = ChatHeadView(this@MainActivity)
+                val chatHeadView = chatHeadService.createChatHeadView(this@MainActivity)
                 chatHeadView.initialize(prepareDummyChatHeads())
-                chatHeadService.attachView(chatHeadView)
                 chatHeadService.openChatHeads()
             }
 

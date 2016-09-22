@@ -24,7 +24,7 @@
                 android:contentDescription="@string/default_chat_head_thumbnail" />
         </FrameLayout>
 
-        <xyz.fcampbell.chatheads.view.CollapsingRecyclerView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/icons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

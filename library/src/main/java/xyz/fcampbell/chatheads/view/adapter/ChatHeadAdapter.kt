@@ -1,10 +1,10 @@
 package xyz.fcampbell.chatheads.view.adapter
 
 import android.support.annotation.LayoutRes
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import xyz.fcampbell.chatheads.R
+import xyz.fcampbell.chatheads.view.ChatHeadView
 
 /**
  * Adapts a data set into an icon and a page to be shown when the icon is expanded
@@ -15,6 +15,7 @@ abstract class ChatHeadAdapter(
 ) : ChatHeadIconAdapter.Delegate, ChatHeadPagerAdapter.Delegate {
     internal val iconAdapter = ChatHeadIconAdapter(iconLayout, this)
     internal val pageAdapter = ChatHeadPagerAdapter(pageLayout, this)
+    internal val onStateChangeListeners = mutableSetOf<(ChatHeadView.State) -> Unit>()
 
     abstract override fun getItemCount(): Int
     abstract override fun bindIcon(icon: View, position: Int)
@@ -25,23 +26,19 @@ abstract class ChatHeadAdapter(
         imageView.setImageResource(R.drawable.ic_default_thumbnail_48dp) //TODO get a proper default thumb
     }
 
+    fun addOnStateChangeListener(listener: (ChatHeadView.State) -> Unit) {
+        onStateChangeListeners += listener
+    }
+
+    fun removeOnStateChangeListener(listener: (ChatHeadView.State) -> Unit) {
+        onStateChangeListeners -= listener
+    }
+
+    internal fun onStateChange(newState: ChatHeadView.State) {
+        onStateChangeListeners.forEach { it.invoke(newState) }
+    }
+
     open fun onChatHeadSelected(position: Int) {
-    }
-
-    open fun onOpening() {
-        Log.i("Adapter", "Opening")
-    }
-
-    open fun onOpen() {
-        Log.i("Adapter", "Open")
-    }
-
-    open fun onClosing() {
-        Log.i("Adapter", "Closing")
-    }
-
-    open fun onClose() {
-        Log.i("Adapter", "Close")
     }
 
     fun notifyDataSetChanged() {

@@ -3,7 +3,9 @@ package xyz.fcampbell.chatheads.view
 import android.animation.TimeInterpolator
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 import kotlin.properties.Delegates
@@ -13,33 +15,24 @@ import kotlin.properties.Delegates
  */
 internal class ChatHeadOrchestrator @JvmOverloads constructor(
         private val thumbnailContainer: View,
-        private val icons: CollapsingRecyclerView,
+        private val icons: RecyclerView,
         private val pages: ViewPager,
-        initialState: State = ChatHeadOrchestrator.State.CLOSED) {
+        initialState: ChatHeadView.State = ChatHeadView.State.CLOSED) {
     private lateinit var adapter: ChatHeadAdapter
 
-    internal enum class State {
-        CLOSED, OPENING, OPEN, CLOSING
-    }
-
-    private var state: State by Delegates.observable(initialState, { property, oldState, newState ->
-        when (newState) {
-            ChatHeadOrchestrator.State.CLOSED -> adapter.onClose()
-            ChatHeadOrchestrator.State.OPENING -> adapter.onOpening()
-            ChatHeadOrchestrator.State.OPEN -> adapter.onOpen()
-            ChatHeadOrchestrator.State.CLOSING -> adapter.onClosing()
-        }
+    internal var state: ChatHeadView.State by Delegates.observable(initialState, { property, oldState, newState ->
+        adapter.onStateChange(newState)
     })
 
     private val onThumbnailClickListener = { thumbnail: View ->
         when (state) {
-            State.OPEN, State.OPENING -> close()
-            State.CLOSED, State.CLOSING -> open()
+            ChatHeadView.State.OPEN, ChatHeadView.State.OPENING -> close()
+            ChatHeadView.State.CLOSED, ChatHeadView.State.CLOSING -> open()
         }
     }
 
     private val onIconClickListener = { position: Int ->
-        if (state == State.OPEN) {
+        if (state == ChatHeadView.State.OPEN) {
             if (position == pages.currentItem) {
                 close()
             } else {
@@ -64,7 +57,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         thumbnailContainer.apply {
             setOnClickListener(onThumbnailClickListener)
             visibility = when (state) {
-                ChatHeadOrchestrator.State.OPEN -> View.GONE
+                ChatHeadView.State.OPEN -> View.GONE
                 else -> View.VISIBLE
             }
         }
@@ -74,7 +67,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
             adapter = chatHeadAdapter.iconAdapter
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             visibility = when (state) {
-                ChatHeadOrchestrator.State.CLOSED -> View.GONE
+                ChatHeadView.State.CLOSED -> View.GONE
                 else -> View.VISIBLE
             }
 
@@ -86,16 +79,16 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
             addOnPageChangeListener(onPageChangeListener)
             adapter = chatHeadAdapter.pageAdapter
             visibility = when (state) {
-                ChatHeadOrchestrator.State.CLOSED -> View.GONE
+                ChatHeadView.State.CLOSED -> View.GONE
                 else -> View.VISIBLE
             }
         }
     }
 
     fun open() {
-        if (state == State.OPEN || state == State.OPENING) return
+        if (state == ChatHeadView.State.OPEN || state == ChatHeadView.State.OPENING) return
 
-        state = State.OPENING
+        state = ChatHeadView.State.OPENING
         setPagesPivotToTop()
         pages.animate()
                 .scaleX(1f)
@@ -107,7 +100,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                     icons.visibility = View.VISIBLE
                     pages.visibility = View.VISIBLE
                 }
-                .withEndAction({ state = State.OPEN })
+                .withEndAction({ state = ChatHeadView.State.OPEN })
                 .start()
 
         thumbnailContainer.animate()
@@ -116,13 +109,21 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .withEndAction({ thumbnailContainer.visibility = View.GONE })
                 .start()
 
-        icons.expandWithAnimation()
+        icons.forEachChild { child ->
+            child.animate()
+                    .translationX(0f)
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setDuration(ChatHeadOrchestrator.OPEN_ANIMATION_DURATION)
+                    .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                    .start()
+        }
     }
 
     fun close() {
-        if (state == State.CLOSED || state == State.CLOSING) return
+        if (state == ChatHeadView.State.CLOSED || state == ChatHeadView.State.CLOSING) return
 
-        state = State.CLOSING
+        state = ChatHeadView.State.CLOSING
         setPagesPivotToTop()
         pages.animate()
                 .scaleX(0.9f)
@@ -131,7 +132,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .setDuration(CLOSE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withEndAction({
-                    state = State.CLOSED
+                    state = ChatHeadView.State.CLOSED
                     icons.visibility = View.GONE
                     pages.visibility = View.GONE
                 })
@@ -144,7 +145,15 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .withStartAction({ thumbnailContainer.visibility = View.VISIBLE })
                 .start()
 
-        icons.collapseWithAnimation()
+        icons.forEachChild { child ->
+            child.animate()
+                    .translationX(-child.x)
+                    .translationY(-child.y)
+                    .alpha(0f)
+                    .setDuration(ChatHeadOrchestrator.CLOSE_ANIMATION_DURATION)
+                    .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                    .start()
+        }
     }
 
     private fun setPagesPivotToTop() {
@@ -157,6 +166,10 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         pages.setCurrentItem(position, true)
 
         adapter.onChatHeadSelected(position)
+    }
+
+    inline fun ViewGroup.forEachChild(action: (View) -> Unit) {
+        for (i in 0..childCount - 1) action(getChildAt(i))
     }
 
     companion object {
