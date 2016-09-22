@@ -5,10 +5,9 @@ import android.graphics.PixelFormat
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.WindowManager
-import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 /**
- * Created by francois on 2016-09-22.
+ * Customization of ChatHeadView that is meant to be shown in a floating system overlay
  */
 class FloatingChatHeadView @JvmOverloads constructor(
         context: Context,
@@ -27,40 +26,28 @@ class FloatingChatHeadView @JvmOverloads constructor(
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
         type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
-        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         format = PixelFormat.TRANSLUCENT
-    }
-
-    private var oldX = 0f
-    private var oldY = 0f
-    private val onStateChange: (State) -> Unit = { newState ->
-        when (newState) {
-            State.OPENING -> {
-                oldX = layoutParams.x.toFloat()
-                oldY = layoutParams.y.toFloat()
-
-                layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
-                layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
-                moveTo(0f, 0f)
-            }
-            State.CLOSING -> {
-                layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
-                layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
-                moveTo(oldX, oldY)
-            }
-            else -> Unit
-        }
-    }
-
-    override fun initialize(adapter: ChatHeadAdapter) {
-        super.initialize(adapter)
-
-        adapter.addOnStateChangeListener(onStateChange)
     }
 
     fun attachToWindow(windowManager: WindowManager) {
         this.windowManager = windowManager
         windowManager.addView(this, layoutParams)
+    }
+
+    override fun savePosition() {
+        oldX = layoutParams.x.toFloat()
+        oldY = layoutParams.y.toFloat()
+    }
+
+    override fun setLayoutParamsForOpening() {
+        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
+        layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
+    }
+
+    override fun setLayoutParamsForClosing() {
+        layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
+        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
     }
 
     override fun moveTo(newX: Float, newY: Float) {

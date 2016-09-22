@@ -26,7 +26,6 @@ class ChatHeadService : Service() {
 
     /**
      * Shows a ChatHeadView as a floating view.
-     * @param view The root layout to attachView.
      */
     fun attachView() {
         attachedToWindow = true
@@ -39,6 +38,7 @@ class ChatHeadService : Service() {
     fun detachView() {
         if (attachedToWindow) {
             windowManager.removeView(floatingChatHeadView)
+            attachedToWindow = false
         }
     }
 
