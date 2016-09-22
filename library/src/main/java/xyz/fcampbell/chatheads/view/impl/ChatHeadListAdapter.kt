@@ -23,21 +23,6 @@ class ChatHeadListAdapter(
 ) : ChatHeadAdapter(thumbnail, iconLayout) {
 
     /**
-     * Convenience class to adapt a List or array of ChatHeads. A basic ChatHead class is also included.
-     * It is just a container for a Drawable for the icon and a View for the page.
-     *
-     * @param chatHeads The array of chat heads to show
-     * @param iconLayout The layout to inflate to show one icon
-     * @param iconImageId The id of an ImageView to show the chat head's icon
-     */
-    constructor(
-            chatHeads: Array<ChatHead>,
-            thumbnail: View?,
-            @LayoutRes iconLayout: Int,
-            @IdRes iconImageId: Int
-    ) : this(chatHeads.toList(), thumbnail, iconLayout, iconImageId)
-
-    /**
      * @return The number of chat heads in your dataset
      */
     override fun getChatHeadCount() = chatHeads.size
