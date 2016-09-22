@@ -2,7 +2,6 @@ package xyz.fcampbell.chatheads.testapp
 
 import android.content.ComponentName
 import android.content.ServiceConnection
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.IBinder
@@ -53,16 +52,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun prepareDummyChatHeads(): ChatHeadAdapter {
-        val chatHeads = listOf(ChatHeadListAdapter.ChatHead(
-                resources.getDrawable(R.drawable.ic_filter_1_black_48dp, null),
-                TextView(this).apply { text = "Chat head 1"; background = ColorDrawable(Color.RED) }
-        ), ChatHeadListAdapter.ChatHead(
-                resources.getDrawable(R.drawable.ic_filter_2_black_48dp, null),
-                TextView(this).apply { text = "Chat head 2"; background = ColorDrawable(Color.BLUE) }
-        ), ChatHeadListAdapter.ChatHead(
-                resources.getDrawable(R.drawable.ic_filter_3_black_48dp, null),
-                TextView(this).apply { text = "Chat head 3"; background = ColorDrawable(Color.WHITE) }
-        ))
+        val chatHeads = (0..23).map { i ->
+            ChatHeadListAdapter.ChatHead(
+                    resources.getDrawable(R.drawable.ic_filter_1_black_48dp, null),
+                    TextView(this).apply { text = "Chat head $i"; background = ColorDrawable((0b1111 shl i) or (0xFF shl 24)) }
+            )
+        }.toList()
 
         return ChatHeadListAdapter(chatHeads, null, R.layout.layout_icon, R.id.iconImage)
     }
