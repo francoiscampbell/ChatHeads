@@ -26,7 +26,7 @@ class FloatingChatHeadView @JvmOverloads constructor(
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
         type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
-        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         format = PixelFormat.TRANSLUCENT
     }
 
@@ -43,11 +43,14 @@ class FloatingChatHeadView @JvmOverloads constructor(
     override fun setLayoutParamsForOpening() {
         layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
         layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
+        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        layoutParams.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE //does nothing???
     }
 
     override fun setLayoutParamsForClosing() {
         layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
     }
 
     override fun moveTo(newX: Float, newY: Float) {

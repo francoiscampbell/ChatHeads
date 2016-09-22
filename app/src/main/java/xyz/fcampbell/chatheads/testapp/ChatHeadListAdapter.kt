@@ -4,8 +4,8 @@ import android.graphics.drawable.Drawable
 import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
-import android.widget.TextView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 /**
@@ -43,7 +43,7 @@ class ChatHeadListAdapter(
      * @return The View to show as a page for position
      */
     override fun bindPage(page: View, position: Int) {
-        (page.findViewById(pageTextViewId) as TextView).text = chatHeads[position].text
+        (page.findViewById(pageTextViewId) as EditText).setText(chatHeads[position].text)
     }
 
     /**
