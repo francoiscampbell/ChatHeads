@@ -258,7 +258,6 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     }
 
     internal interface Orchestrable {
-
         fun setLayoutParamsForState(state: ChatHeadView.State)
         fun savePosition()
 
@@ -268,7 +267,6 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         fun animateTo(newX: Float, newY: Float, duration: Long)
         fun attachTrash(trash: View)
         fun detachTrash(trash: View)
-
     }
 
     companion object {
@@ -282,4 +280,5 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         const val PAGES_CLOSE_SCALE = 0.9f
         const val TRASH_EMPHASIS_SCALE = 1.2f
     }
+
 }

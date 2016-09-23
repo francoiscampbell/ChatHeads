@@ -27,20 +27,8 @@ class ChatHeadView internal constructor(
     var onTrashListener: (() -> Unit)? = null
     var onTrashIntersectListener: (() -> Unit)? = null
 
-    private val chatHeadsLayoutParams = WindowManager.LayoutParams().apply {
+    private val currentChatHeadsLayoutParams = WindowManager.LayoutParams().apply {
         copyFrom(DEFAULT_CHAT_HEAD_LAYOUT_PARAMS)
-    }
-    private val trashLayoutParams = WindowManager.LayoutParams().apply {
-        gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-        x = 0
-        y = 0
-        width = WindowManager.LayoutParams.WRAP_CONTENT
-        height = WindowManager.LayoutParams.WRAP_CONTENT
-        type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
-        flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
-        format = PixelFormat.TRANSLUCENT
     }
 
     fun initialize(adapter: ChatHeadAdapter) {
@@ -109,15 +97,15 @@ class ChatHeadView internal constructor(
     }
 
 
-    override fun attachTrash(trash: View) = windowManager.addView(trash, trashLayoutParams)
+    override fun attachTrash(trash: View) = windowManager.addView(trash, TRASH_LAYOUT_PARAMS)
 
     override fun detachTrash(trash: View) = windowManager.removeView(trash)
 
     private var savedX = 0f
     private var savedY = 0f
     override fun savePosition() {
-        savedX = chatHeadsLayoutParams.x.toFloat()
-        savedY = chatHeadsLayoutParams.y.toFloat()
+        savedX = currentChatHeadsLayoutParams.x.toFloat()
+        savedY = currentChatHeadsLayoutParams.y.toFloat()
     }
 
     override fun restorePosition() = animateTo(savedX, savedY, ChatHeadOrchestrator.THUMBNAIL_MOVE_ANIMATION_DURATION)
@@ -125,33 +113,33 @@ class ChatHeadView internal constructor(
     override fun setLayoutParamsForState(state: State) {
         when (state) {
             State.CLOSED, State.OPENING -> {
-                chatHeadsLayoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
-                chatHeadsLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
-                chatHeadsLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                currentChatHeadsLayoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
+                currentChatHeadsLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+                currentChatHeadsLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                         WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
             }
             else -> {
-                chatHeadsLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
-                chatHeadsLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
-                chatHeadsLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                currentChatHeadsLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
+                currentChatHeadsLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
+                currentChatHeadsLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                         WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
             }
         }
-        windowManager.updateViewLayout(this, chatHeadsLayoutParams)
+        windowManager.updateViewLayout(this, currentChatHeadsLayoutParams)
     }
 
     override fun dragTo(newX: Float, newY: Float) {
-        chatHeadsLayoutParams.x = newX.toInt()
-        chatHeadsLayoutParams.y = newY.toInt()
-        windowManager.updateViewLayout(this, chatHeadsLayoutParams)
+        currentChatHeadsLayoutParams.x = newX.toInt()
+        currentChatHeadsLayoutParams.y = newY.toInt()
+        windowManager.updateViewLayout(this, currentChatHeadsLayoutParams)
     }
 
     override fun animateTo(newX: Float, newY: Float, duration: Long) {
         val pvhX = PropertyValuesHolder.ofInt("x", newX.toInt())
         val pvhY = PropertyValuesHolder.ofInt("y", newY.toInt())
-        ObjectAnimator.ofPropertyValuesHolder(LayoutParamsObjectAnimatorWrapper(chatHeadsLayoutParams), pvhX, pvhY).apply {
+        ObjectAnimator.ofPropertyValuesHolder(LayoutParamsObjectAnimatorWrapper(currentChatHeadsLayoutParams), pvhX, pvhY).apply {
             this.duration = duration
             interpolator = ChatHeadOrchestrator.ANIMATION_INTERPOLATOR
             start()
@@ -177,8 +165,20 @@ class ChatHeadView internal constructor(
     }
 
     companion object {
-        val DEFAULT_CHAT_HEAD_LAYOUT_PARAMS = WindowManager.LayoutParams().apply {
+        private val DEFAULT_CHAT_HEAD_LAYOUT_PARAMS = WindowManager.LayoutParams().apply {
             gravity = Gravity.START or Gravity.TOP
+            x = 0
+            y = 0
+            width = WindowManager.LayoutParams.WRAP_CONTENT
+            height = WindowManager.LayoutParams.WRAP_CONTENT
+            type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
+            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+            format = PixelFormat.TRANSLUCENT
+        }
+        private val TRASH_LAYOUT_PARAMS = WindowManager.LayoutParams().apply {
+            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             x = 0
             y = 0
             width = WindowManager.LayoutParams.WRAP_CONTENT
@@ -217,4 +217,5 @@ class ChatHeadView internal constructor(
          */
         CLOSING
     }
+
 }
