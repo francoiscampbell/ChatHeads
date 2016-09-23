@@ -1,12 +1,13 @@
-package xyz.fcampbell.chatheads.view
+package xyz.fcampbell.chatheads.view.helpers
 
 import android.animation.TimeInterpolator
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
+import kotlinx.android.synthetic.main.layout_chat_head_view.view.*
+import xyz.fcampbell.chatheads.view.ChatHeadView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 import kotlin.properties.Delegates
 
@@ -14,13 +15,14 @@ import kotlin.properties.Delegates
  * Orchestrates between the RecyclerView and the ViewPager
  */
 internal class ChatHeadOrchestrator @JvmOverloads constructor(
-        private val thumbnailContainer: View,
-        private val icons: RecyclerView,
-        private val pages: ViewPager,
+        private val thumbnailContainer: ViewGroup,
+        private val contentContainer: ViewGroup,
         initialState: ChatHeadView.State = ChatHeadView.State.CLOSED) {
     private lateinit var adapter: ChatHeadAdapter
 
     internal var state: ChatHeadView.State by Delegates.observable(initialState, { property, oldState, newState ->
+        contentContainer.visibility = if (state == ChatHeadView.State.CLOSED) View.GONE else View.VISIBLE
+        thumbnailContainer.visibility = if (state == ChatHeadView.State.OPEN) View.GONE else View.VISIBLE
         adapter.onStateChange(newState)
     })
 
@@ -51,26 +53,23 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         override fun onPageSelected(position: Int) = selectChatHead(position)
     }
 
+    private val icons = contentContainer.icons
+    private val pages = contentContainer.pages
+
     fun setup(chatHeadAdapter: ChatHeadAdapter) {
         adapter = chatHeadAdapter
 
         thumbnailContainer.apply {
             setOnClickListener(onThumbnailClickListener)
-            visibility = when (state) {
-                ChatHeadView.State.OPEN -> View.GONE
-                else -> View.VISIBLE
-            }
+            visibility = if (state == ChatHeadView.State.OPEN) View.GONE else View.VISIBLE
         }
+
+        contentContainer.visibility = if (state == ChatHeadView.State.CLOSED) View.GONE else View.VISIBLE
 
         chatHeadAdapter.iconAdapter.chatHeadClickedListener = onIconClickListener
         icons.apply {
             adapter = chatHeadAdapter.iconAdapter
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            visibility = when (state) {
-                ChatHeadView.State.CLOSED -> View.GONE
-                else -> View.VISIBLE
-            }
-
             //offset the child drawing by 1 and return the first child on the last drawing iteration to keep it in front
             setChildDrawingOrderCallback { childCount, iteration -> (iteration + 1) % childCount }
         }
@@ -78,10 +77,6 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         pages.apply {
             addOnPageChangeListener(onPageChangeListener)
             adapter = chatHeadAdapter.pageAdapter
-            visibility = when (state) {
-                ChatHeadView.State.CLOSED -> View.GONE
-                else -> View.VISIBLE
-            }
         }
     }
 
@@ -96,17 +91,12 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .alpha(1f)
                 .setDuration(OPEN_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withStartAction {
-                    icons.visibility = View.VISIBLE
-                    pages.visibility = View.VISIBLE
-                }
                 .withEndAction({ state = ChatHeadView.State.OPEN })
                 .start()
 
         thumbnailContainer.animate()
                 .alpha(0f)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withEndAction({ thumbnailContainer.visibility = View.GONE })
                 .start()
 
         icons.forEachChild { child ->
@@ -114,8 +104,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                     .translationX(0f)
                     .translationY(0f)
                     .alpha(1f)
-                    .setDuration(ChatHeadOrchestrator.OPEN_ANIMATION_DURATION)
-                    .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                    .setDuration(Companion.OPEN_ANIMATION_DURATION)
+                    .setInterpolator(Companion.ANIMATION_INTERPOLATOR)
                     .start()
         }
     }
@@ -131,18 +121,13 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .alpha(0f)
                 .setDuration(CLOSE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withEndAction({
-                    state = ChatHeadView.State.CLOSED
-                    icons.visibility = View.GONE
-                    pages.visibility = View.GONE
-                })
+                .withEndAction({ state = ChatHeadView.State.CLOSED })
                 .start()
 
         adapter.bindThumbnail(thumbnailContainer)
         thumbnailContainer.animate()
                 .alpha(1f)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withStartAction({ thumbnailContainer.visibility = View.VISIBLE })
                 .start()
 
         icons.forEachChild { child ->
@@ -150,8 +135,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                     .translationX(-child.x)
                     .translationY(-child.y)
                     .alpha(0f)
-                    .setDuration(ChatHeadOrchestrator.CLOSE_ANIMATION_DURATION)
-                    .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                    .setDuration(Companion.CLOSE_ANIMATION_DURATION)
+                    .setInterpolator(Companion.ANIMATION_INTERPOLATOR)
                     .start()
         }
     }

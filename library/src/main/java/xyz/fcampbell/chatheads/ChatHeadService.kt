@@ -27,7 +27,7 @@ class ChatHeadService : Service() {
     /**
      * Shows a ChatHeadView as a floating view.
      */
-    fun attachView() {
+    private fun attachView() {
         attachedToWindow = true
         floatingChatHeadView.attachToWindow(windowManager)
     }
