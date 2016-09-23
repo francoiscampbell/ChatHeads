@@ -23,7 +23,9 @@ class FloatingChatHeadView @JvmOverloads constructor(
         defStyleAttr) {
 
     lateinit var windowManager: WindowManager
-    private val chatHeadsLayoutParams = DEFAULT_CHAT_HEAD_LAYOUT_PARAMS
+    private val chatHeadsLayoutParams = WindowManager.LayoutParams().apply {
+        copyFrom(DEFAULT_CHAT_HEAD_LAYOUT_PARAMS)
+    }
     private val trashLayoutParams = WindowManager.LayoutParams().apply {
         gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
         x = 0
