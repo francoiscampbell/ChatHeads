@@ -13,8 +13,8 @@ abstract class ChatHeadAdapter(
         @LayoutRes private val iconLayout: Int,
         @LayoutRes private val pageLayout: Int
 ) : ChatHeadIconAdapter.Delegate, ChatHeadPagerAdapter.Delegate {
-    internal val iconAdapter = ChatHeadIconAdapter(iconLayout, this)
-    internal val pageAdapter = ChatHeadPagerAdapter(pageLayout, this)
+    internal val iconAdapter by lazy { ChatHeadIconAdapter(iconLayout, this) }
+    internal val pageAdapter by lazy { ChatHeadPagerAdapter(pageLayout, this) }
 
     abstract override fun getItemCount(): Int
     abstract override fun bindIcon(container: View, position: Int)
@@ -31,10 +31,16 @@ abstract class ChatHeadAdapter(
     open fun onChatHeadSelected(position: Int) {
     }
 
+    open fun getTrashVibrateMillis() = DEFAULT_VIBRATE_MILLIS
+
     fun notifyDataSetChanged() {
         iconAdapter.notifyDataSetChanged()
         pageAdapter.notifyDataSetChanged()
     }
 
     //TODO add other dataset changed methods
+
+    companion object {
+        const val DEFAULT_VIBRATE_MILLIS = 50L
+    }
 }

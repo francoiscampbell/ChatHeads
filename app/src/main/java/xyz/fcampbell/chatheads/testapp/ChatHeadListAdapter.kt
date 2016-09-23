@@ -5,6 +5,7 @@ import android.support.annotation.LayoutRes
 import android.view.View
 import kotlinx.android.synthetic.main.layout_icon.view.*
 import kotlinx.android.synthetic.main.layout_page.view.*
+import org.jetbrains.anko.onClick
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 /**
@@ -52,7 +53,9 @@ class ChatHeadListAdapter(
      * @return The View to show as a page for position
      */
     override fun bindPage(container: View, position: Int) {
-        container.pageText.setText(chatHeads[position].text)
+        container.send.onClick {
+            container.history.append(container.pageText.text.toString() + "\n")
+        }
     }
 
     /**

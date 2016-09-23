@@ -88,7 +88,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         if (state == ChatHeadView.State.OPEN || state == ChatHeadView.State.OPENING) return
 
         orchestrable.savePosition()
-        orchestrable.animateTo(0f, 0f, ANIMATION_DURATION)
+        orchestrable.animateTo(0f, 0f, THUMBNAIL_MOVE_ANIMATION_DURATION)
 
         state = ChatHeadView.State.OPENING
 
@@ -97,7 +97,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .scaleX(1f)
                 .scaleY(1f)
                 .alpha(1f)
-                .setDuration(ANIMATION_DURATION)
+                .setDuration(OPEN_CLOSE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withStartAction {
                     state = ChatHeadView.State.IN_POSITION
@@ -106,17 +106,17 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .withEndAction({
                     state = ChatHeadView.State.OPEN
                 })
-                .setStartDelay(ANIMATION_DURATION)
+                .setStartDelay(THUMBNAIL_MOVE_ANIMATION_DURATION)
                 .start()
 
         thumbnailContainer.animate()
                 .alpha(0f)
-                .setDuration(ANIMATION_DURATION)
+                .setDuration(OPEN_CLOSE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withEndAction {
                     thumbnailContainer.visibility = View.GONE
                 }
-                .setStartDelay(ANIMATION_DURATION)
+                .setStartDelay(THUMBNAIL_MOVE_ANIMATION_DURATION)
                 .start()
 
         icons.forEachChild { child ->
@@ -124,12 +124,12 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                     .translationX(0f)
                     .translationY(0f)
                     .alpha(1f)
-                    .setDuration(ANIMATION_DURATION)
+                    .setDuration(OPEN_CLOSE_ANIMATION_DURATION)
                     .setInterpolator(ANIMATION_INTERPOLATOR)
                     .withEndAction {
                         icons.requestLayout()
                     }
-                    .setStartDelay(ANIMATION_DURATION)
+                    .setStartDelay(THUMBNAIL_MOVE_ANIMATION_DURATION)
                     .start()
         }
     }
@@ -144,7 +144,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .scaleX(0.9f)
                 .scaleY(0.9f)
                 .alpha(0f)
-                .setDuration(ANIMATION_DURATION)
+                .setDuration(OPEN_CLOSE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withEndAction({
                     state = ChatHeadView.State.IN_POSITION
@@ -157,7 +157,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         adapter.bindThumbnail(thumbnailContainer)
         thumbnailContainer.animate()
                 .alpha(1f)
-                .setDuration(ANIMATION_DURATION)
+                .setDuration(OPEN_CLOSE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withStartAction {
                     thumbnailContainer.visibility = View.VISIBLE
@@ -169,7 +169,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                     .translationX(-child.x)
                     .translationY(-child.y)
                     .alpha(0f)
-                    .setDuration(ANIMATION_DURATION)
+                    .setDuration(OPEN_CLOSE_ANIMATION_DURATION)
                     .setInterpolator(ANIMATION_INTERPOLATOR)
                     .start()
         }
@@ -183,8 +183,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         adapter.bindTrash(trashRoot)
         trashRoot.animate()
                 .alpha(1f)
-                .setDuration(5 * ChatHeadOrchestrator.ANIMATION_DURATION)
-                .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                .setDuration(TRASH_FADE_ANIMATION_DURATION)
+                .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withStartAction {
                     trashRoot.visibility = View.VISIBLE
                     orchestrable.attachTrash(trashRoot)
@@ -197,8 +197,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
 
         trashRoot.animate()
                 .alpha(0f)
-                .setDuration(5 * ChatHeadOrchestrator.ANIMATION_DURATION)
-                .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                .setDuration(TRASH_FADE_ANIMATION_DURATION)
+                .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withEndAction {
                     orchestrable.detachTrash(trashRoot)
                     trashRoot.visibility = View.GONE
@@ -256,7 +256,10 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
 
     companion object {
 
-        const val ANIMATION_DURATION = 100L
+        const val BASE_ANIMATION_DURATION = 100L
+        const val OPEN_CLOSE_ANIMATION_DURATION = BASE_ANIMATION_DURATION
+        const val THUMBNAIL_MOVE_ANIMATION_DURATION = 2 * BASE_ANIMATION_DURATION
+        const val TRASH_FADE_ANIMATION_DURATION = 5 * BASE_ANIMATION_DURATION
         val ANIMATION_INTERPOLATOR: TimeInterpolator
             get() = OvershootInterpolator(0.5f)//new instance every time to run simultaneous animations
 

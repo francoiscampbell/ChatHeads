@@ -1,9 +1,11 @@
 package xyz.fcampbell.chatheads
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.os.Vibrator
 import android.support.annotation.StyleRes
 import xyz.fcampbell.chatheads.view.ChatHeadView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
@@ -12,6 +14,7 @@ import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
  * The main Service to manage chat heads.
  */
 class ChatHeadService : Service() {
+    private val vibrator by lazy { getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
     private lateinit var chatHeadView: ChatHeadView
     private var attachedToWindow = false
 
@@ -27,7 +30,10 @@ class ChatHeadService : Service() {
         if (themeResId != 0) setTheme(themeResId)
 
         chatHeadView = ChatHeadView(this)
-        chatHeadView.initialize(adapter, { detachView() })
+        chatHeadView.initialize(adapter, {
+            vibrator.vibrate(adapter.getTrashVibrateMillis())
+            detachView()
+        })
         chatHeadView.attachToWindow()
 
         attachedToWindow = true

@@ -110,7 +110,7 @@ class ChatHeadView internal constructor(
         savedY = chatHeadsLayoutParams.y.toFloat()
     }
 
-    override fun restorePosition() = animateTo(savedX, savedY, ChatHeadOrchestrator.ANIMATION_DURATION)
+    override fun restorePosition() = animateTo(savedX, savedY, ChatHeadOrchestrator.THUMBNAIL_MOVE_ANIMATION_DURATION)
 
     override fun setLayoutParamsForState(state: State) {
         when (state) {
