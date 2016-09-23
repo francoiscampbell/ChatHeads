@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.onClick
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun prepareDummyChatHeads(): ChatHeadAdapter {
-        val icon = resources.getDrawable(R.drawable.ic_filter_1_black_48dp, null)
+        val icon = ActivityCompat.getDrawable(this, R.drawable.ic_filter_1_black_48dp)
         val chatHeads = (0..23).map { ChatHeadListAdapter.ChatHead(icon, "Chat head $it") }.toList()
 
         return ChatHeadListAdapter(chatHeads, R.layout.layout_icon, R.layout.layout_page)
