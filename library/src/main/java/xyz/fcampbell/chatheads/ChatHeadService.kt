@@ -1,23 +1,18 @@
 package xyz.fcampbell.chatheads
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.support.annotation.StyleRes
-import android.view.WindowManager
 import xyz.fcampbell.chatheads.view.ChatHeadView
-import xyz.fcampbell.chatheads.view.FloatingChatHeadView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 /**
  * The main Service to manage chat heads.
  */
 class ChatHeadService : Service() {
-    private val windowManager by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
-    private val chatHeadView by lazy { FloatingChatHeadView(this) }
-
+    private lateinit var chatHeadView: ChatHeadView
     private var attachedToWindow = false
 
     /**
@@ -27,10 +22,15 @@ class ChatHeadService : Service() {
      */
     @JvmOverloads
     fun initialize(adapter: ChatHeadAdapter, @StyleRes themeResId: Int = 0): ChatHeadView {
+        if (attachedToWindow) return chatHeadView //already attached
+
         if (themeResId != 0) setTheme(themeResId)
-        attachedToWindow = true
+
+        chatHeadView = ChatHeadView(this)
         chatHeadView.initialize(adapter, { detachView() })
-        chatHeadView.attachToWindow(windowManager)
+        chatHeadView.attachToWindow()
+
+        attachedToWindow = true
         return chatHeadView
     }
 
@@ -39,7 +39,7 @@ class ChatHeadService : Service() {
      */
     fun detachView() {
         if (attachedToWindow) {
-            windowManager.removeView(chatHeadView)
+            chatHeadView.detachFromWindow()
             attachedToWindow = false
         }
     }

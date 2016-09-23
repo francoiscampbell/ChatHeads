@@ -22,10 +22,10 @@ class MainActivity : AppCompatActivity() {
             boundToService = true
 
             val chatHeadService = (service as ChatHeadService.LocalBinder).service
+            chatHeadService.initialize(prepareDummyChatHeads(), R.style.AppTheme)
 
             addView.onClick {
-                chatHeadService.initialize(prepareDummyChatHeads())
-//                chatHeadService.openChatHeads()
+                chatHeadService.initialize(prepareDummyChatHeads(), R.style.AppTheme)
             }
 
             removeView.onClick {
@@ -41,10 +41,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         bindService(Intent(this, ChatHeadService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
-//        val chatHeadView = ChatHeadView(this)
-//        chatHeadView.initialize(prepareDummyChatHeads(), {})
-//        setContentView(chatHeadView)
-//        chatHeadView.open()
     }
 
     fun prepareDummyChatHeads(): ChatHeadAdapter {
