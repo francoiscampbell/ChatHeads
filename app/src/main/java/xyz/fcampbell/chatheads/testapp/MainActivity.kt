@@ -23,10 +23,8 @@ class MainActivity : AppCompatActivity() {
             val chatHeadService = (service as ChatHeadService.LocalBinder).service
 
             addView.onClick {
-                val chatHeadView = chatHeadService.createChatHeadView(this@MainActivity)
-                chatHeadView.initialize(prepareDummyChatHeads())
-                chatHeadService.attachView()
-//                chatHeadService.openChatHeads()
+                chatHeadService.initialize(prepareDummyChatHeads())
+                chatHeadService.openChatHeads()
             }
 
             removeView.onClick {
