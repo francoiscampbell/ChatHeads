@@ -41,8 +41,8 @@ class FloatingChatHeadView @JvmOverloads constructor(
     }
 
     override fun savePosition() {
-        oldX = layoutParams.x.toFloat()
-        oldY = layoutParams.y.toFloat()
+        savedX = layoutParams.x.toFloat()
+        savedY = layoutParams.y.toFloat()
     }
 
     override fun setLayoutParamsForState(state: State) {
@@ -82,6 +82,7 @@ class FloatingChatHeadView @JvmOverloads constructor(
     }
 
     private inner class LayoutParamsObjectAnimatorWrapper(private val layoutParams: WindowManager.LayoutParams) {
+        @Suppress("unused") //reflection
         var x: Int
             get() = layoutParams.x
             set(value) {
@@ -89,6 +90,7 @@ class FloatingChatHeadView @JvmOverloads constructor(
                 windowManager.updateViewLayout(this@FloatingChatHeadView, layoutParams)
             }
 
+        @Suppress("unused") //reflection
         var y: Int
             get() = layoutParams.y
             set(value) {

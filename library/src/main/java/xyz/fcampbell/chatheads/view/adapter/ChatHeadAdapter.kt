@@ -3,6 +3,7 @@ package xyz.fcampbell.chatheads.view.adapter
 import android.support.annotation.LayoutRes
 import android.view.View
 import kotlinx.android.synthetic.main.layout_chat_head_view.view.*
+import xyz.fcampbell.chatheads.R
 
 /**
  * Adapts a data set into an icon and a page to be shown when the icon is expanded

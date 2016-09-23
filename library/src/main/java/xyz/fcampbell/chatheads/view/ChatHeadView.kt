@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.FrameLayout
+import kotlinx.android.synthetic.main.layout_chat_head_view.view.*
+import xyz.fcampbell.chatheads.R
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 import xyz.fcampbell.chatheads.view.helpers.ChatHeadOrchestrator
 
@@ -21,7 +23,30 @@ open class ChatHeadView @JvmOverloads constructor(
         attrs,
         defStyleAttr), ChatHeadOrchestrator.Orchestrable {
     enum class State {
-        CLOSED, OPENING, OPEN, CLOSING
+        /**
+         * Thumbnail visible and floating
+         */
+        CLOSED,
+
+        /**
+         * Thumbnail moving towards (0,0)
+         */
+        OPENING,
+
+        /**
+         * Thumbnail has moved and content is ready to open
+         */
+        IN_POSITION,
+
+        /**
+         * Content is open
+         */
+        OPEN,
+
+        /**
+         * Thumbnail moving back towards its original location
+         */
+        CLOSING
     }
 
     private val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -74,11 +99,15 @@ open class ChatHeadView @JvmOverloads constructor(
         return super.dispatchTouchEvent(event)
     }
 
-    protected var oldX = 0f
-    protected var oldY = 0f
+    protected var savedX = 0f
+    protected var savedY = 0f
     override fun savePosition() {
-        oldX = x
-        oldY = y
+        savedX = x
+        savedY = y
+    }
+
+    override fun restorePosition() {
+        animateTo(savedX, savedY, ChatHeadOrchestrator.ANIMATION_DURATION)
     }
 
     override fun setLayoutParamsForState(state: State) {
@@ -92,10 +121,6 @@ open class ChatHeadView @JvmOverloads constructor(
                 layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
             }
         }
-    }
-
-    override fun restorePosition() {
-        animateTo(oldX, oldY, ChatHeadOrchestrator.ANIMATION_DURATION)
     }
 
     override fun dragTo(newX: Float, newY: Float) = animateTo(newX, newY, 0)

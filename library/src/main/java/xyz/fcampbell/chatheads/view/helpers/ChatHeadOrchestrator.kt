@@ -9,6 +9,7 @@ import android.view.animation.OvershootInterpolator
 import kotlinx.android.synthetic.main.layout_chat_head_view.view.*
 import xyz.fcampbell.chatheads.view.ChatHeadView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
+import kotlin.properties.Delegates
 
 /**
  * Orchestrates between the RecyclerView and the ViewPager
@@ -17,13 +18,17 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         private val orchestrable: Orchestrable,
         private val thumbnailContainer: ViewGroup,
         private val contentContainer: ViewGroup,
-        internal var state: ChatHeadView.State = ChatHeadView.State.CLOSED) {
+        initialState: ChatHeadView.State = ChatHeadView.State.CLOSED) {
     private lateinit var adapter: ChatHeadAdapter
+
+    internal var state by Delegates.observable(initialState, { kProperty, oldState, newState ->
+        orchestrable.setLayoutParamsForState(newState)
+    })
 
     private val onThumbnailClickListener = { thumbnail: View ->
         when (state) {
             ChatHeadView.State.OPEN, ChatHeadView.State.OPENING -> close()
-            ChatHeadView.State.CLOSED, ChatHeadView.State.CLOSING -> open()
+            ChatHeadView.State.CLOSED, ChatHeadView.State.CLOSING, ChatHeadView.State.IN_POSITION -> open()
         }
     }
 
@@ -78,10 +83,10 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     fun open() {
         if (state == ChatHeadView.State.OPEN || state == ChatHeadView.State.OPENING) return
 
-        state = ChatHeadView.State.OPENING
-
         orchestrable.savePosition()
         orchestrable.animateTo(0f, 0f, ANIMATION_DURATION)
+
+        state = ChatHeadView.State.OPENING
 
         setPagesPivotToTop()
         pages.animate()
@@ -91,11 +96,11 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .setDuration(ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withStartAction {
+                    state = ChatHeadView.State.IN_POSITION
                     contentContainer.visibility = View.VISIBLE
                 }
                 .withEndAction({
                     state = ChatHeadView.State.OPEN
-                    orchestrable.setLayoutParamsForState(state)
                 })
                 .setStartDelay(ANIMATION_DURATION)
                 .start()
@@ -117,6 +122,9 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                     .alpha(1f)
                     .setDuration(ANIMATION_DURATION)
                     .setInterpolator(ANIMATION_INTERPOLATOR)
+                    .withEndAction {
+                        icons.requestLayout()
+                    }
                     .setStartDelay(ANIMATION_DURATION)
                     .start()
         }
@@ -135,10 +143,10 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .setDuration(ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withEndAction({
-                    state = ChatHeadView.State.CLOSED
+                    state = ChatHeadView.State.IN_POSITION
                     contentContainer.visibility = View.GONE
-                    orchestrable.setLayoutParamsForState(state)
                     orchestrable.restorePosition()
+                    state = ChatHeadView.State.CLOSED
                 })
                 .start()
 
