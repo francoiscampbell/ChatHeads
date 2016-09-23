@@ -29,11 +29,11 @@ class ChatHeadListAdapter(
     /**
      * Bind data to an icon view.
      *
-     * @param icon The icon that will be shown. This is inflated from iconLayout
+     * @param container The icon that will be shown. This is inflated from iconLayout
      * @param position The position of the chat head in the dataset
      */
-    override fun bindIcon(icon: View, position: Int) {
-        (icon.findViewById(iconImageId) as ImageView).setImageDrawable(chatHeads[position].icon)
+    override fun bindIcon(container: View, position: Int) {
+        (container.findViewById(iconImageId) as ImageView).setImageDrawable(chatHeads[position].icon)
     }
 
     /**
@@ -42,8 +42,8 @@ class ChatHeadListAdapter(
      * @param position The position of the chat head in the dataset
      * @return The View to show as a page for position
      */
-    override fun bindPage(page: View, position: Int) {
-        (page.findViewById(pageTextViewId) as EditText).setText(chatHeads[position].text)
+    override fun bindPage(container: View, position: Int) {
+        (container.findViewById(pageTextViewId) as EditText).setText(chatHeads[position].text)
     }
 
     /**

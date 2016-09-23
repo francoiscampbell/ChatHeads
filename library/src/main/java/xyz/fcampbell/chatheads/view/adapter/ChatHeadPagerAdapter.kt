@@ -30,6 +30,6 @@ internal class ChatHeadPagerAdapter(
 
     interface Delegate {
         fun getItemCount(): Int
-        fun bindPage(page: View, position: Int)
+        fun bindPage(container: View, position: Int)
     }
 }

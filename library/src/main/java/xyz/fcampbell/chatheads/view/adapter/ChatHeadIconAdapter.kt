@@ -33,6 +33,6 @@ internal class ChatHeadIconAdapter(
 
     interface Delegate {
         fun getItemCount(): Int
-        fun bindIcon(icon: View, position: Int)
+        fun bindIcon(container: View, position: Int)
     }
 }

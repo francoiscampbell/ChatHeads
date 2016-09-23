@@ -2,7 +2,7 @@ package xyz.fcampbell.chatheads.view.adapter
 
 import android.support.annotation.LayoutRes
 import android.view.View
-import android.widget.ImageView
+import kotlinx.android.synthetic.main.layout_chat_head_view.view.*
 import xyz.fcampbell.chatheads.R
 import xyz.fcampbell.chatheads.view.ChatHeadView
 
@@ -18,12 +18,11 @@ abstract class ChatHeadAdapter(
     internal val onStateChangeListeners = mutableSetOf<(ChatHeadView.State) -> Unit>()
 
     abstract override fun getItemCount(): Int
-    abstract override fun bindIcon(icon: View, position: Int)
-    abstract override fun bindPage(page: View, position: Int)
+    abstract override fun bindIcon(container: View, position: Int)
+    abstract override fun bindPage(container: View, position: Int)
 
-    open fun bindThumbnail(view: View) {
-        val imageView = view.findViewById(R.id.defaultThumbnail) as ImageView
-        imageView.setImageResource(R.drawable.ic_default_thumbnail_48dp) //TODO get a proper default thumb
+    open fun bindThumbnail(container: View) {
+        container.defaultThumbnail.setImageResource(R.drawable.ic_default_thumbnail_48dp) //TODO get a proper default thumb
     }
 
     fun addOnStateChangeListener(listener: (ChatHeadView.State) -> Unit) {
