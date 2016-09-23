@@ -9,22 +9,16 @@ import android.view.animation.OvershootInterpolator
 import kotlinx.android.synthetic.main.layout_chat_head_view.view.*
 import xyz.fcampbell.chatheads.view.ChatHeadView
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
-import kotlin.properties.Delegates
 
 /**
  * Orchestrates between the RecyclerView and the ViewPager
  */
 internal class ChatHeadOrchestrator @JvmOverloads constructor(
+        private val orchestrable: Orchestrable,
         private val thumbnailContainer: ViewGroup,
         private val contentContainer: ViewGroup,
-        initialState: ChatHeadView.State = ChatHeadView.State.CLOSED) {
+        internal var state: ChatHeadView.State = ChatHeadView.State.CLOSED) {
     private lateinit var adapter: ChatHeadAdapter
-
-    internal var state: ChatHeadView.State by Delegates.observable(initialState, { property, oldState, newState ->
-        contentContainer.visibility = if (state == ChatHeadView.State.CLOSED) View.GONE else View.VISIBLE
-        thumbnailContainer.visibility = if (state == ChatHeadView.State.OPEN) View.GONE else View.VISIBLE
-        adapter.onStateChange(newState)
-    })
 
     private val onThumbnailClickListener = { thumbnail: View ->
         when (state) {
@@ -59,6 +53,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     fun setup(chatHeadAdapter: ChatHeadAdapter) {
         adapter = chatHeadAdapter
 
+        adapter.bindThumbnail(thumbnailContainer)
         thumbnailContainer.apply {
             setOnClickListener(onThumbnailClickListener)
             visibility = if (state == ChatHeadView.State.OPEN) View.GONE else View.VISIBLE
@@ -84,19 +79,35 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         if (state == ChatHeadView.State.OPEN || state == ChatHeadView.State.OPENING) return
 
         state = ChatHeadView.State.OPENING
+
+        orchestrable.savePosition()
+        orchestrable.animateTo(0f, 0f, ANIMATION_DURATION)
+
         setPagesPivotToTop()
         pages.animate()
                 .scaleX(1f)
                 .scaleY(1f)
                 .alpha(1f)
-                .setDuration(OPEN_ANIMATION_DURATION)
+                .setDuration(ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withEndAction({ state = ChatHeadView.State.OPEN })
+                .withStartAction {
+                    contentContainer.visibility = View.VISIBLE
+                }
+                .withEndAction({
+                    state = ChatHeadView.State.OPEN
+                    orchestrable.setLayoutParamsForState(state)
+                })
+                .setStartDelay(ANIMATION_DURATION)
                 .start()
 
         thumbnailContainer.animate()
                 .alpha(0f)
+                .setDuration(ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
+                .withEndAction {
+                    thumbnailContainer.visibility = View.GONE
+                }
+                .setStartDelay(ANIMATION_DURATION)
                 .start()
 
         icons.forEachChild { child ->
@@ -104,8 +115,9 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                     .translationX(0f)
                     .translationY(0f)
                     .alpha(1f)
-                    .setDuration(Companion.OPEN_ANIMATION_DURATION)
-                    .setInterpolator(Companion.ANIMATION_INTERPOLATOR)
+                    .setDuration(ANIMATION_DURATION)
+                    .setInterpolator(ANIMATION_INTERPOLATOR)
+                    .setStartDelay(ANIMATION_DURATION)
                     .start()
         }
     }
@@ -114,20 +126,30 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         if (state == ChatHeadView.State.CLOSED || state == ChatHeadView.State.CLOSING) return
 
         state = ChatHeadView.State.CLOSING
+
         setPagesPivotToTop()
         pages.animate()
                 .scaleX(0.9f)
                 .scaleY(0.9f)
                 .alpha(0f)
-                .setDuration(CLOSE_ANIMATION_DURATION)
+                .setDuration(ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
-                .withEndAction({ state = ChatHeadView.State.CLOSED })
+                .withEndAction({
+                    state = ChatHeadView.State.CLOSED
+                    contentContainer.visibility = View.GONE
+                    orchestrable.setLayoutParamsForState(state)
+                    orchestrable.restorePosition()
+                })
                 .start()
 
         adapter.bindThumbnail(thumbnailContainer)
         thumbnailContainer.animate()
                 .alpha(1f)
+                .setDuration(ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
+                .withStartAction {
+                    thumbnailContainer.visibility = View.VISIBLE
+                }
                 .start()
 
         icons.forEachChild { child ->
@@ -135,8 +157,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                     .translationX(-child.x)
                     .translationY(-child.y)
                     .alpha(0f)
-                    .setDuration(Companion.CLOSE_ANIMATION_DURATION)
-                    .setInterpolator(Companion.ANIMATION_INTERPOLATOR)
+                    .setDuration(ANIMATION_DURATION)
+                    .setInterpolator(ANIMATION_INTERPOLATOR)
                     .start()
         }
     }
@@ -157,9 +179,18 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         for (i in 0..childCount - 1) action(getChildAt(i))
     }
 
+    interface Orchestrable {
+        fun setLayoutParamsForState(state: ChatHeadView.State)
+
+        fun savePosition()
+        fun restorePosition()
+
+        fun dragTo(newX: Float, newY: Float)
+        fun animateTo(newX: Float, newY: Float, duration: Long)
+    }
+
     companion object {
-        const val OPEN_ANIMATION_DURATION = 100L
-        const val CLOSE_ANIMATION_DURATION = 100L
+        const val ANIMATION_DURATION = 100L
 
         val ANIMATION_INTERPOLATOR: TimeInterpolator
             get() = OvershootInterpolator(0.5f)//new instance every time to run simultaneous animations

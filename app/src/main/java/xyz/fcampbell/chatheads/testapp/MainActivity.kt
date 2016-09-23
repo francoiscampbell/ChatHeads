@@ -25,7 +25,8 @@ class MainActivity : AppCompatActivity() {
             addView.onClick {
                 val chatHeadView = chatHeadService.createChatHeadView(this@MainActivity)
                 chatHeadView.initialize(prepareDummyChatHeads())
-                chatHeadService.openChatHeads()
+                chatHeadService.attachView()
+//                chatHeadService.openChatHeads()
             }
 
             removeView.onClick {

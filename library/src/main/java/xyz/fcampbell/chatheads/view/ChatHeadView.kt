@@ -6,8 +6,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.FrameLayout
-import kotlinx.android.synthetic.main.layout_chat_head_view.view.*
-import xyz.fcampbell.chatheads.R
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 import xyz.fcampbell.chatheads.view.helpers.ChatHeadOrchestrator
 
@@ -21,7 +19,7 @@ open class ChatHeadView @JvmOverloads constructor(
 ) : FrameLayout(
         context,
         attrs,
-        defStyleAttr) {
+        defStyleAttr), ChatHeadOrchestrator.Orchestrable {
     enum class State {
         CLOSED, OPENING, OPEN, CLOSING
     }
@@ -32,27 +30,7 @@ open class ChatHeadView @JvmOverloads constructor(
     private val thumbnailContainer = root.thumbnailContainer
     private val contentContainer = root.contentContainer
 
-    private val orchestrator = ChatHeadOrchestrator(thumbnailContainer, contentContainer)
-
-    protected var oldX = 0f
-    protected var oldY = 0f
-    private val onStateChange: (State) -> Unit = { newState ->
-        when (newState) {
-            State.OPENING -> {
-                savePosition()
-                setLayoutParamsForOpening()
-                moveTo(0f, 0f)
-            }
-            State.CLOSED -> {
-                setLayoutParamsForClosing()
-                moveTo(oldX, oldY)
-            }
-            else -> Unit
-        }
-    }
-
-    private val initialScreenPos = IntArray(2)
-    private var gotInitialScreenPos = false
+    private val orchestrator = ChatHeadOrchestrator(this, thumbnailContainer, contentContainer)
 
     init {
         removeAllViews() //Remove any children set in XML
@@ -61,15 +39,6 @@ open class ChatHeadView @JvmOverloads constructor(
 
     fun initialize(adapter: ChatHeadAdapter) {
         orchestrator.setup(adapter)
-        adapter.addOnStateChangeListener(onStateChange)
-    }
-
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        if (!gotInitialScreenPos) {
-            getLocationOnScreen(initialScreenPos)
-            gotInitialScreenPos = true
-        }
     }
 
     fun open() = orchestrator.open()
@@ -92,10 +61,10 @@ open class ChatHeadView @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> {
                 if (orchestrator.state == State.CLOSED) {
                     dragging = true
-                    moveTo(event.rawX - dragPointerOffsetX - initialScreenPos[0], event.rawY - dragPointerOffsetY - initialScreenPos[1])
+                    dragTo(event.rawX - dragPointerOffsetX, event.rawY - dragPointerOffsetY)
                 }
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            else -> {
                 if (dragging) {
                     dragging = false
                     return false
@@ -105,20 +74,33 @@ open class ChatHeadView @JvmOverloads constructor(
         return super.dispatchTouchEvent(event)
     }
 
-    protected open fun savePosition() {
+    protected var oldX = 0f
+    protected var oldY = 0f
+    override fun savePosition() {
         oldX = x
         oldY = y
     }
 
-    protected open fun setLayoutParamsForOpening() {
-        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
-        layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
+    override fun setLayoutParamsForState(state: State) {
+        when (state) {
+            ChatHeadView.State.CLOSED -> {
+                layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
+                layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+            }
+            else -> {
+                layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
+                layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
+            }
+        }
     }
 
-    protected open fun setLayoutParamsForClosing() {
-        layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
-        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+    override fun restorePosition() {
+        animateTo(oldX, oldY, ChatHeadOrchestrator.ANIMATION_DURATION)
     }
 
-    open fun moveTo(newX: Float, newY: Float) = animate().x(newX).y(newY).setDuration(0).start()
+    override fun dragTo(newX: Float, newY: Float) = animateTo(newX, newY, 0)
+
+    override fun animateTo(newX: Float, newY: Float, duration: Long) {
+        animate().x(newX).y(newY).setDuration(duration).start()
+    }
 }
