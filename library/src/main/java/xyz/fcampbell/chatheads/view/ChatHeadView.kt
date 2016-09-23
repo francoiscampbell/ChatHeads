@@ -43,7 +43,7 @@ open class ChatHeadView @JvmOverloads constructor(
                 setLayoutParamsForOpening()
                 moveTo(0f, 0f)
             }
-            State.CLOSING -> {
+            State.CLOSED -> {
                 setLayoutParamsForClosing()
                 moveTo(oldX, oldY)
             }
