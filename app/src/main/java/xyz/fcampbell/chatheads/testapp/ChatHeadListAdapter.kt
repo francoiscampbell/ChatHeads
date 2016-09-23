@@ -1,11 +1,10 @@
 package xyz.fcampbell.chatheads.testapp
 
 import android.graphics.drawable.Drawable
-import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.view.View
-import android.widget.EditText
-import android.widget.ImageView
+import kotlinx.android.synthetic.main.layout_icon.view.*
+import kotlinx.android.synthetic.main.layout_page.view.*
 import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
 
 /**
@@ -14,17 +13,19 @@ import xyz.fcampbell.chatheads.view.adapter.ChatHeadAdapter
  *
  * @param chatHeads The list of chat heads to show
  * @param iconLayout The layout to inflate to show one icon
- * @param iconImageId The id of an ImageView to show the chat head's icon
  */
 class ChatHeadListAdapter(
         private val chatHeads: List<ChatHead>,
         @LayoutRes iconLayout: Int,
-        @LayoutRes pageLayout: Int,
-        @IdRes private val iconImageId: Int,
-        @IdRes private val pageTextViewId: Int
+        @LayoutRes pageLayout: Int
 ) : ChatHeadAdapter(iconLayout, pageLayout) {
+    private var iconThumbPadding = 0
 
     override fun getItemCount(): Int = chatHeads.size
+
+    override fun bindThumbnail(container: View) {
+        setPadding(container)
+    }
 
     /**
      * Bind data to an icon view.
@@ -33,7 +34,15 @@ class ChatHeadListAdapter(
      * @param position The position of the chat head in the dataset
      */
     override fun bindIcon(container: View, position: Int) {
-        (container.findViewById(iconImageId) as ImageView).setImageDrawable(chatHeads[position].icon)
+        setPadding(container)
+        container.iconImage.setImageDrawable(chatHeads[position].icon)
+    }
+
+    private fun setPadding(container: View) {
+        if (iconThumbPadding == 0) {
+            iconThumbPadding = container.context.resources.getDimensionPixelSize(R.dimen.icon_thumb_padding)
+        }
+        container.setPadding(iconThumbPadding, iconThumbPadding, iconThumbPadding, iconThumbPadding)
     }
 
     /**
@@ -43,7 +52,7 @@ class ChatHeadListAdapter(
      * @return The View to show as a page for position
      */
     override fun bindPage(container: View, position: Int) {
-        (container.findViewById(pageTextViewId) as EditText).setText(chatHeads[position].text)
+        container.pageText.setText(chatHeads[position].text)
     }
 
     /**

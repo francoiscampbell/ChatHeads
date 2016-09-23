@@ -22,7 +22,7 @@ abstract class ChatHeadAdapter(
     abstract override fun bindPage(container: View, position: Int)
 
     open fun bindThumbnail(container: View) {
-        container.defaultThumbnail.setImageResource(R.drawable.ic_default_thumbnail_48dp) //TODO get a proper default thumb
+        container.defaultThumbnail.setImageResource(R.drawable.ic_default_thumbnail_48dp)
     }
 
     fun addOnStateChangeListener(listener: (ChatHeadView.State) -> Unit) {

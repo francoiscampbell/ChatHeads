@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         val icon = resources.getDrawable(R.drawable.ic_filter_1_black_48dp, null)
         val chatHeads = (0..23).map { ChatHeadListAdapter.ChatHead(icon, "Chat head $it") }.toList()
 
-        return ChatHeadListAdapter(chatHeads, R.layout.layout_icon, R.layout.layout_page, R.id.iconImage, R.id.pageText)
+        return ChatHeadListAdapter(chatHeads, R.layout.layout_icon, R.layout.layout_page)
     }
 
     override fun onDestroy() {
