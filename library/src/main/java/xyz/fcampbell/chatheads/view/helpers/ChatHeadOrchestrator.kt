@@ -141,8 +141,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
 
         setPagesPivotToTop()
         pages.animate()
-                .scaleX(0.9f)
-                .scaleY(0.9f)
+                .scaleX(PAGES_CLOSE_SCALE)
+                .scaleY(PAGES_CLOSE_SCALE)
                 .alpha(0f)
                 .setDuration(OPEN_CLOSE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
@@ -209,8 +209,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
 
     fun emphasizeTrash() {
         trashRoot.animate()
-                .scaleX(1.2f)
-                .scaleY(1.2f)
+                .scaleX(TRASH_EMPHASIS_SCALE)
+                .scaleY(TRASH_EMPHASIS_SCALE)
                 .setDuration(BASE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .start()
@@ -278,5 +278,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         const val TRASH_FADE_ANIMATION_DURATION = 5 * BASE_ANIMATION_DURATION
         val ANIMATION_INTERPOLATOR: TimeInterpolator
             get() = OvershootInterpolator(0.5f)//new instance every time to run simultaneous animations
+
+        const val PAGES_CLOSE_SCALE = 0.9f
+        const val TRASH_EMPHASIS_SCALE = 1.2f
     }
 }
