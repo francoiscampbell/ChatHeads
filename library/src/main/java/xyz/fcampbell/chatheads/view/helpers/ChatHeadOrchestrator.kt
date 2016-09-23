@@ -207,6 +207,23 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .start()
     }
 
+    fun emphasizeTrash() {
+        trashRoot.animate()
+                .scaleX(1.2f)
+                .scaleY(1.2f)
+                .setDuration(BASE_ANIMATION_DURATION)
+                .setInterpolator(ANIMATION_INTERPOLATOR)
+                .start()
+    }
+
+    fun deEmphasizeTrash() {
+        trashRoot.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(BASE_ANIMATION_DURATION)
+                .setInterpolator(ANIMATION_INTERPOLATOR)
+                .start()
+    }
 
     private val thumbScreenLocation = IntArray(2)
     private val trashScreenLocation = IntArray(2)
@@ -255,14 +272,11 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
     }
 
     companion object {
-
         const val BASE_ANIMATION_DURATION = 100L
         const val OPEN_CLOSE_ANIMATION_DURATION = BASE_ANIMATION_DURATION
         const val THUMBNAIL_MOVE_ANIMATION_DURATION = 2 * BASE_ANIMATION_DURATION
         const val TRASH_FADE_ANIMATION_DURATION = 5 * BASE_ANIMATION_DURATION
         val ANIMATION_INTERPOLATOR: TimeInterpolator
             get() = OvershootInterpolator(0.5f)//new instance every time to run simultaneous animations
-
     }
-
 }

@@ -29,12 +29,12 @@ class ChatHeadService : Service() {
 
         if (themeResId != 0) setTheme(themeResId)
 
-        chatHeadView = ChatHeadView(this)
-        chatHeadView.initialize(adapter, {
-            vibrator.vibrate(adapter.getTrashVibrateMillis())
-            detachView()
-        })
-        chatHeadView.attachToWindow()
+        chatHeadView = ChatHeadView(this).apply {
+            initialize(adapter)
+            onTrashIntersectListener = { vibrator.vibrate(adapter.getTrashVibrateMillis()) }
+            onTrashListener = { detachView() }
+            attachToWindow()
+        }
 
         attachedToWindow = true
         return chatHeadView

@@ -24,7 +24,8 @@ class ChatHeadView internal constructor(
 
     private val orchestrator = ChatHeadOrchestrator(this, chatHeadsRoot, trashRoot)
 
-    private lateinit var onTrashListener: () -> Unit
+    var onTrashListener: (() -> Unit)? = null
+    var onTrashIntersectListener: (() -> Unit)? = null
 
     private val chatHeadsLayoutParams = WindowManager.LayoutParams().apply {
         copyFrom(DEFAULT_CHAT_HEAD_LAYOUT_PARAMS)
@@ -42,9 +43,7 @@ class ChatHeadView internal constructor(
         format = PixelFormat.TRANSLUCENT
     }
 
-    fun initialize(adapter: ChatHeadAdapter, onTrashListener: () -> Unit) {
-        this.onTrashListener = onTrashListener
-
+    fun initialize(adapter: ChatHeadAdapter) {
         removeAllViews() //Remove any children set in XML
         addView(chatHeadsRoot)
 
@@ -67,6 +66,7 @@ class ChatHeadView internal constructor(
     private var dragPointerOffsetX: Float = 0f
     private var dragPointerOffsetY: Float = 0f
     private var dragging = false
+    private var inTrashIntersect = false
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -81,6 +81,16 @@ class ChatHeadView internal constructor(
 
                     orchestrator.showTrash()
                     dragTo(event.rawX - dragPointerOffsetX, event.rawY - dragPointerOffsetY)
+                    if (orchestrator.checkTrashIntersect()) {
+                        if (!inTrashIntersect) {
+                            inTrashIntersect = true
+                            onTrashIntersectListener?.invoke()
+                            orchestrator.emphasizeTrash()
+                        }
+                    } else {
+                        inTrashIntersect = false
+                        orchestrator.deEmphasizeTrash()
+                    }
                 }
             }
             else -> {
@@ -89,7 +99,7 @@ class ChatHeadView internal constructor(
 
                     orchestrator.hideTrash()
                     if (orchestrator.checkTrashIntersect()) {
-                        onTrashListener()
+                        onTrashListener?.invoke()
                     }
                     return false
                 }
