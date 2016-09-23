@@ -28,10 +28,10 @@ open class ChatHeadView @JvmOverloads constructor(
 
     private val orchestrator by lazy { ChatHeadOrchestrator(this, chatHeadsRoot, trashRoot) }
 
-    private lateinit var trashListener: () -> Unit
+    private lateinit var onTrashListener: () -> Unit
 
     fun initialize(adapter: ChatHeadAdapter, trashListener: () -> Unit) {
-        this.trashListener = trashListener
+        this.onTrashListener = trashListener
 
         removeAllViews() //Remove any children set in XML
         addView(chatHeadsRoot)
@@ -71,7 +71,7 @@ open class ChatHeadView @JvmOverloads constructor(
 
                     orchestrator.hideTrash()
                     if (orchestrator.checkTrashIntersect()) {
-                        trashListener()
+                        onTrashListener()
                     }
                     return false
                 }
