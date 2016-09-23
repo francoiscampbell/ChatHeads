@@ -1,3 +1,4 @@
 <resources>
     <dimen name="status_bar_height">24dp</dimen>
+    <dimen name="trash_margin_bottom">24dp</dimen>
 </resources>

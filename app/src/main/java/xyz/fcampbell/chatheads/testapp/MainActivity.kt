@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
 
             addView.onClick {
                 chatHeadService.initialize(prepareDummyChatHeads())
-                chatHeadService.openChatHeads()
+//                chatHeadService.openChatHeads()
             }
 
             removeView.onClick {
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         bindService(Intent(this, ChatHeadService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
 //        val chatHeadView = ChatHeadView(this)
-//        chatHeadView.initialize(prepareDummyChatHeads())
+//        chatHeadView.initialize(prepareDummyChatHeads(), {})
 //        setContentView(chatHeadView)
 //        chatHeadView.open()
     }

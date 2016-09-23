@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ChatHeads</string>
-    <string name="default_chat_head_thumbnail">Default chat head thumbnail</string>
+    <string name="content_desc_default_chat_head_thumbnail">Default chat head thumbnail</string>
+    <string name="content_desc_trash">Trash</string>
 </resources>

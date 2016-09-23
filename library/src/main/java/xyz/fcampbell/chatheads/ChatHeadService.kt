@@ -29,7 +29,7 @@ class ChatHeadService : Service() {
     fun initialize(adapter: ChatHeadAdapter, @StyleRes themeResId: Int = 0): ChatHeadView {
         if (themeResId != 0) setTheme(themeResId)
         attachedToWindow = true
-        chatHeadView.initialize(adapter)
+        chatHeadView.initialize(adapter, { detachView() })
         chatHeadView.attachToWindow(windowManager)
         return chatHeadView
     }

@@ -1,6 +1,7 @@
 package xyz.fcampbell.chatheads.view.helpers
 
 import android.animation.TimeInterpolator
+import android.graphics.Rect
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
@@ -16,8 +17,8 @@ import kotlin.properties.Delegates
  */
 internal class ChatHeadOrchestrator @JvmOverloads constructor(
         private val orchestrable: Orchestrable,
-        private val thumbnailContainer: ViewGroup,
-        private val contentContainer: ViewGroup,
+        chatHeadRoot: View,
+        private val trashRoot: View,
         initialState: ChatHeadView.State = ChatHeadView.State.CLOSED) {
     private lateinit var adapter: ChatHeadAdapter
 
@@ -52,8 +53,11 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         override fun onPageSelected(position: Int) = selectChatHead(position)
     }
 
+    private val contentContainer = chatHeadRoot.contentContainer
     private val icons = contentContainer.icons
     private val pages = contentContainer.pages
+
+    private val thumbnailContainer = chatHeadRoot.thumbnailContainer
 
     fun setup(chatHeadAdapter: ChatHeadAdapter) {
         adapter = chatHeadAdapter
@@ -171,6 +175,55 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         }
     }
 
+    private var trashShown = false
+    fun showTrash() {
+        if (trashShown) return
+
+        trashShown = true
+        adapter.bindTrash(trashRoot)
+        trashRoot.animate()
+                .alpha(1f)
+                .setDuration(5 * ChatHeadOrchestrator.ANIMATION_DURATION)
+                .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                .withStartAction {
+                    trashRoot.visibility = View.VISIBLE
+                    orchestrable.attachTrash(trashRoot)
+                }
+                .start()
+    }
+
+    fun hideTrash() {
+        if (!trashShown) return
+
+        trashRoot.animate()
+                .alpha(0f)
+                .setDuration(5 * ChatHeadOrchestrator.ANIMATION_DURATION)
+                .setInterpolator(ChatHeadOrchestrator.ANIMATION_INTERPOLATOR)
+                .withEndAction {
+                    orchestrable.detachTrash(trashRoot)
+                    trashRoot.visibility = View.GONE
+                    trashShown = false
+                }
+                .start()
+    }
+
+
+    private val thumbScreenLocation = IntArray(2)
+    private val trashScreenLocation = IntArray(2)
+    private val thumbRect = Rect()
+    private val trashRect = Rect()
+    fun checkTrashIntersect(): Boolean {
+        thumbnailContainer.getLocationOnScreen(thumbScreenLocation)
+        thumbnailContainer.getGlobalVisibleRect(thumbRect)
+        thumbRect.offset(thumbScreenLocation[0], thumbScreenLocation[1])
+
+        trashRoot.getLocationOnScreen(trashScreenLocation)
+        trashRoot.getGlobalVisibleRect(trashRect)
+        trashRect.offset(trashScreenLocation[0], trashScreenLocation[1])
+
+        return Rect.intersects(thumbRect, trashRect)
+    }
+
     private fun setPagesPivotToTop() {
         pages.pivotX = (pages.width / 2).toFloat()
         pages.pivotY = (-icons.height).toFloat()
@@ -187,20 +240,26 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         for (i in 0..childCount - 1) action(getChildAt(i))
     }
 
-    interface Orchestrable {
+    internal interface Orchestrable {
+
         fun setLayoutParamsForState(state: ChatHeadView.State)
-
         fun savePosition()
-        fun restorePosition()
 
+        fun restorePosition()
         fun dragTo(newX: Float, newY: Float)
+
         fun animateTo(newX: Float, newY: Float, duration: Long)
+        fun attachTrash(trash: View)
+        fun detachTrash(trash: View)
+
     }
 
     companion object {
-        const val ANIMATION_DURATION = 100L
 
+        const val ANIMATION_DURATION = 100L
         val ANIMATION_INTERPOLATOR: TimeInterpolator
             get() = OvershootInterpolator(0.5f)//new instance every time to run simultaneous animations
+
     }
+
 }

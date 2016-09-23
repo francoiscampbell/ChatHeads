@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/trashRoot"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|center_horizontal">
+
+    <ImageView
+        android:id="@+id/defaultTrash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/trash_margin_bottom"
+        android:contentDescription="@string/content_desc_trash"
+        android:src="@drawable/ic_trash_black_48dp" />
+</FrameLayout>

@@ -3,6 +3,7 @@ package xyz.fcampbell.chatheads.view.adapter
 import android.support.annotation.LayoutRes
 import android.view.View
 import kotlinx.android.synthetic.main.layout_chat_head_view.view.*
+import kotlinx.android.synthetic.main.layout_trash.view.*
 import xyz.fcampbell.chatheads.R
 
 /**
@@ -21,6 +22,10 @@ abstract class ChatHeadAdapter(
 
     open fun bindThumbnail(container: View) {
         container.defaultThumbnail.setImageResource(R.drawable.ic_default_thumbnail_48dp)
+    }
+
+    open fun bindTrash(container: View) {
+        container.defaultTrash.setImageResource(R.drawable.ic_trash_black_48dp)
     }
 
     open fun onChatHeadSelected(position: Int) {
