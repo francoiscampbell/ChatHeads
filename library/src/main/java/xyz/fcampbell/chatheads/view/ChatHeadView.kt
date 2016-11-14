@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.content.Context
 import android.graphics.PixelFormat
+import android.os.Vibrator
 import android.view.*
 import android.widget.FrameLayout
 import xyz.fcampbell.chatheads.R
@@ -14,10 +15,12 @@ import xyz.fcampbell.chatheads.view.helpers.ChatHeadOrchestrator
  * Root layout that must be the parent of whatever will be used as a chat head.
  */
 class ChatHeadView internal constructor(
-        context: Context
+        context: Context,
+        adapter: ChatHeadAdapter
 ) : FrameLayout(context, null, 0), ChatHeadOrchestrator.Orchestrable {
     private val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
     private val chatHeadsRoot = layoutInflater.inflate(R.layout.layout_chat_head_view, null)
     private val trashRoot = layoutInflater.inflate(R.layout.layout_trash, null)
@@ -25,13 +28,15 @@ class ChatHeadView internal constructor(
     private val orchestrator = ChatHeadOrchestrator(this, chatHeadsRoot, trashRoot)
 
     var onTrashListener: (() -> Unit)? = null
-    var onTrashIntersectListener: (() -> Unit)? = null
+    private val onTrashIntersectListener = { vibrator.vibrate(adapter.getTrashVibrateMillis()) }
+
+    private var attachedToWindow = false
 
     private val currentChatHeadsLayoutParams = WindowManager.LayoutParams().apply {
         copyFrom(DEFAULT_CHAT_HEAD_LAYOUT_PARAMS)
     }
 
-    fun initialize(adapter: ChatHeadAdapter) {
+    init {
         removeAllViews() //Remove any children set in XML
         addView(chatHeadsRoot)
 
@@ -39,18 +44,38 @@ class ChatHeadView internal constructor(
     }
 
     fun attachToWindow() {
+        checkAttached(false)
         windowManager.addView(this, DEFAULT_CHAT_HEAD_LAYOUT_PARAMS)
+        attachedToWindow = true
     }
 
     fun detachFromWindow() {
+        checkAttached(true)
         windowManager.removeView(this)
+        attachedToWindow = false
     }
 
-    fun open() = orchestrator.open()
+    fun open() {
+        checkAttached(true)
+        orchestrator.open()
+    }
 
-    fun close() = orchestrator.close()
+    fun close() {
+        checkAttached(true)
+        orchestrator.close()
+    }
+
+    private fun checkAttached(shouldBeAttached: Boolean) {
+        if (shouldBeAttached && !attachedToWindow) {
+            throw IllegalStateException("The ChatHeadView should be attached to its window but is not")
+        }
+        if (!shouldBeAttached && attachedToWindow) {
+            throw IllegalStateException("The ChatHeadView should not be attached to its window but is")
+        }
+    }
 
     //location of touch event relative to view's top-left corner
+    private val screenPos = IntArray(2)
     private var dragPointerOffsetX: Float = 0f
     private var dragPointerOffsetY: Float = 0f
     private var dragging = false
@@ -58,7 +83,6 @@ class ChatHeadView internal constructor(
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                val screenPos = IntArray(2)
                 getLocationOnScreen(screenPos)
                 dragPointerOffsetX = event.rawX - screenPos[0]
                 dragPointerOffsetY = event.rawY - screenPos[1]
@@ -72,7 +96,7 @@ class ChatHeadView internal constructor(
                     if (orchestrator.checkTrashIntersect()) {
                         if (!inTrashIntersect) {
                             inTrashIntersect = true
-                            onTrashIntersectListener?.invoke()
+                            onTrashIntersectListener.invoke()
                             orchestrator.emphasizeTrash()
                         }
                     } else {
@@ -96,10 +120,9 @@ class ChatHeadView internal constructor(
         return super.dispatchTouchEvent(event)
     }
 
+    override fun showTrash(trash: View) = windowManager.addView(trash, TRASH_LAYOUT_PARAMS)
 
-    override fun attachTrash(trash: View) = windowManager.addView(trash, TRASH_LAYOUT_PARAMS)
-
-    override fun detachTrash(trash: View) = windowManager.removeView(trash)
+    override fun hideTrash(trash: View) = windowManager.removeView(trash)
 
     private var savedX = 0f
     private var savedY = 0f

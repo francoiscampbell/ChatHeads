@@ -187,7 +187,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withStartAction {
                     trashRoot.visibility = View.VISIBLE
-                    orchestrable.attachTrash(trashRoot)
+                    orchestrable.showTrash(trashRoot)
                 }
                 .start()
     }
@@ -200,7 +200,7 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .setDuration(TRASH_FADE_ANIMATION_DURATION)
                 .setInterpolator(ANIMATION_INTERPOLATOR)
                 .withEndAction {
-                    orchestrable.detachTrash(trashRoot)
+                    orchestrable.hideTrash(trashRoot)
                     trashRoot.visibility = View.GONE
                     trashShown = false
                 }
@@ -225,20 +225,20 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
                 .start()
     }
 
-    private val thumbScreenLocation = IntArray(2)
+    private val thumbnailScreenLocation = IntArray(2)
     private val trashScreenLocation = IntArray(2)
-    private val thumbRect = Rect()
+    private val thumbnailRect = Rect()
     private val trashRect = Rect()
     fun checkTrashIntersect(): Boolean {
-        thumbnailContainer.getLocationOnScreen(thumbScreenLocation)
-        thumbnailContainer.getGlobalVisibleRect(thumbRect)
-        thumbRect.offset(thumbScreenLocation[0], thumbScreenLocation[1])
+        thumbnailContainer.getLocationOnScreen(thumbnailScreenLocation)
+        thumbnailContainer.getGlobalVisibleRect(thumbnailRect)
+        thumbnailRect.offset(thumbnailScreenLocation[0], thumbnailScreenLocation[1])
 
         trashRoot.getLocationOnScreen(trashScreenLocation)
         trashRoot.getGlobalVisibleRect(trashRect)
         trashRect.offset(trashScreenLocation[0], trashScreenLocation[1])
 
-        return Rect.intersects(thumbRect, trashRect)
+        return Rect.intersects(thumbnailRect, trashRect)
     }
 
     private fun setPagesPivotToTop() {
@@ -265,8 +265,8 @@ internal class ChatHeadOrchestrator @JvmOverloads constructor(
         fun dragTo(newX: Float, newY: Float)
 
         fun animateTo(newX: Float, newY: Float, duration: Long)
-        fun attachTrash(trash: View)
-        fun detachTrash(trash: View)
+        fun showTrash(trash: View)
+        fun hideTrash(trash: View)
     }
 
     companion object {

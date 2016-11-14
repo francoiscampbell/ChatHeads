@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
             chatHeadService.initialize(prepareDummyChatHeads(), R.style.AppTheme)
 
             addView.onClick {
-                chatHeadService.initialize(prepareDummyChatHeads(), R.style.AppTheme)
+                chatHeadService.initialize(prepareDummyChatHeads(), theme)
             }
 
             removeView.onClick {
